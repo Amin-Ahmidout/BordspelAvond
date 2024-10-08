@@ -5,13 +5,29 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+string connectionString;
+
+if (builder.Environment.IsDevelopment())
+{
+    // Gebruik de connection string uit appsettings.Development.json voor de ontwikkelomgeving
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+}
+else
+{
+    // Gebruik de environment variable in Azure voor de productieomgeving
+    connectionString = Environment.GetEnvironmentVariable("BORDSPELDB_CONNSTR")
+        ?? throw new InvalidOperationException("Connection string 'BORDSPELDB_CONNSTR' not found.");
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -24,7 +40,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
