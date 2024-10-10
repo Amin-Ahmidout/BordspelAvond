@@ -1,15 +1,28 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using BordspelAvond.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
-namespace BordspelAvond.Data
-
+public class BordspelDbContext : DbContext
 {
-    public class BordspelDbContext : IdentityDbContext
-    {
-        public BordspelDbContext(DbContextOptions<BordspelDbContext> options)
-            : base(options)
-        {}
+    public BordspelDbContext(DbContextOptions<BordspelDbContext> options) : base(options) { }
 
-        public DbSet<Models.Game> Games { get; set; }
+    public DbSet<Game> Games { get; set; }
+    public DbSet<GameNight> GameNights { get; set; }
+   
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<GameNight>()
+            .HasMany(g => g.PlayedGames)
+            .WithMany(g => g.GameNights);
+
+  
+        modelBuilder.Entity<GameNight>()
+            .HasMany(g => g.Players)
+            .WithMany();
+
+ 
     }
 }
