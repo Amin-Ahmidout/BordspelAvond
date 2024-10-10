@@ -5,15 +5,13 @@ namespace BordspelAvond.Models
     public class GameNight
     {
         public int Id { get; set; }
-       public string OrganizerId { get; set; }
-        public IdentityUser Organizer { get; set; }
-
-        public string Address { get; set; }
+        public int OrganizerId { get; set; }
+        public Player Organizer { get; set; } = null!; 
+        public string Address { get; set; } = string.Empty; 
         public int MaxPlayers { get; set; }
         public DateTime DateAndTime { get; set; }
-
-        public List<IdentityUser> Players { get; set; } = new List<IdentityUser>(); // Spelers die meedoen
-        public List<Game> PlayedGames { get; set; } = new List<Game>(); // Gespeelde spellen
+        public List<Player> Players { get; set; } = new List<Player>(); 
+        public List<Game> PlayedGames { get; set; } = new List<Game>(); 
     }
 
 }
