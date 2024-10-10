@@ -4,29 +4,40 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-string connectionString;
+// Connection strings instellen
+string bordspelDbConnectionString;
+string authDbConnectionString;
 
 if (builder.Environment.IsDevelopment())
 {
-    // Gebruik de connection string uit appsettings.Development.json voor de ontwikkelomgeving
-    connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    // Gebruik de connection strings uit appsettings.Development.json voor de ontwikkelomgeving
+    bordspelDbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
         ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+    authDbConnectionString = builder.Configuration.GetConnectionString("AuthConnection")
+        ?? throw new InvalidOperationException("Connection string 'AuthConnection' not found.");
 }
 else
 {
-    // Gebruik de environment variable in Azure voor de productieomgeving
-    connectionString = Environment.GetEnvironmentVariable("BORDSPELDB_CONNSTR")
+    // Gebruik de environment variables in Azure voor de productieomgeving
+    bordspelDbConnectionString = Environment.GetEnvironmentVariable("BORDSPELDB_CONNSTR")
         ?? throw new InvalidOperationException("Connection string 'BORDSPELDB_CONNSTR' not found.");
+
+    authDbConnectionString = Environment.GetEnvironmentVariable("AUTHDB_CONNSTR")
+        ?? throw new InvalidOperationException("Connection string 'AUTHDB_CONNSTR' not found.");
 }
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+// Voeg BordspelDbContext toe
+builder.Services.AddDbContext<BordspelDbContext>(options =>
+    options.UseSqlServer(bordspelDbConnectionString));
 
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+// Voeg AuthDbContext toe
+builder.Services.AddDbContext<AuthDbContext>(options =>
+    options.UseSqlServer(authDbConnectionString));
 
+// Identity configureren met AuthDbContext
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<AuthDbContext>();
 
 builder.Services.AddControllersWithViews();
 

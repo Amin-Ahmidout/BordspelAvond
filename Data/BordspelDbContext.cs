@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 namespace BordspelAvond.Data
 
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class BordspelDbContext : IdentityDbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public BordspelDbContext(DbContextOptions<BordspelDbContext> options)
             : base(options)
         {}
 
