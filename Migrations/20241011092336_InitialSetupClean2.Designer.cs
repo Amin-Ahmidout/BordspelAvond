@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BordspelAvond.Migrations
 {
     [DbContext(typeof(BordspelDbContext))]
-    [Migration("20241010230028_InitialSchema")]
-    partial class InitialSchema
+    [Migration("20241011092336_InitialSetupClean2")]
+    partial class InitialSetupClean2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -76,31 +76,13 @@ namespace BordspelAvond.Migrations
                     b.Property<int>("MaxPlayers")
                         .HasColumnType("int");
 
-                    b.Property<int>("OrganizerId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizerId");
-
-                    b.ToTable("GameNights");
-                });
-
-            modelBuilder.Entity("BordspelAvond.Models.Player", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
+                    b.Property<string>("OrganizerId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Players");
+                    b.ToTable("GameNights");
                 });
 
             modelBuilder.Entity("GameGameNight", b =>
@@ -118,32 +100,6 @@ namespace BordspelAvond.Migrations
                     b.ToTable("GameGameNight");
                 });
 
-            modelBuilder.Entity("GameNightPlayer", b =>
-                {
-                    b.Property<int>("GameNightId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("int");
-
-                    b.HasKey("GameNightId", "PlayerId");
-
-                    b.HasIndex("PlayerId");
-
-                    b.ToTable("GameNightPlayer");
-                });
-
-            modelBuilder.Entity("BordspelAvond.Models.GameNight", b =>
-                {
-                    b.HasOne("BordspelAvond.Models.Player", "Organizer")
-                        .WithMany()
-                        .HasForeignKey("OrganizerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organizer");
-                });
-
             modelBuilder.Entity("GameGameNight", b =>
                 {
                     b.HasOne("BordspelAvond.Models.Game", null)
@@ -155,21 +111,6 @@ namespace BordspelAvond.Migrations
                     b.HasOne("BordspelAvond.Models.GameNight", null)
                         .WithMany()
                         .HasForeignKey("GameNightId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("GameNightPlayer", b =>
-                {
-                    b.HasOne("BordspelAvond.Models.GameNight", null)
-                        .WithMany()
-                        .HasForeignKey("GameNightId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("BordspelAvond.Models.Player", null)
-                        .WithMany()
-                        .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

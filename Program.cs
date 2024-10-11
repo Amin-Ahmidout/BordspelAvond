@@ -1,4 +1,5 @@
 using BordspelAvond.Data;
+using BordspelAvond.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,7 +37,7 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(authDbConnectionString));
 
 // Identity configureren met AuthDbContext
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<Player>()
     .AddEntityFrameworkStores<AuthDbContext>();
 
 builder.Services.AddControllersWithViews();
@@ -59,6 +60,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication(); // Zorg ervoor dat Authentication is ingeschakeld
 app.UseAuthorization();
 
 app.MapControllerRoute(
