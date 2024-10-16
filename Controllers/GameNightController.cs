@@ -42,7 +42,7 @@ namespace BordspelAvond.Controllers
 
         public async Task<IActionResult> Join(int id)
         {
-            var userId = _userManager.GetUserId(User); 
+            var userId = _userManager.GetUserId(User);
             if (userId == null)
             {
                 return RedirectToAction("Login", "Account");
@@ -57,7 +57,21 @@ namespace BordspelAvond.Controllers
                 return NotFound();
             }
 
-            // Check of gebruiker al deelneemt
+            // Controleer of de gebruiker ouder is dan 18 als het een 18+ event is
+            var user = await _userManager.FindByIdAsync(userId);
+            if (gameNight.Is18Plus)
+            {
+                var age = DateTime.Today.Year - user.BirthDate.Year;
+                if (user.BirthDate.Date > DateTime.Today.AddYears(-age)) age--; // Corrigeer voor nog niet verjaarde gebruikers
+                if (age < 18)
+                {
+                    TempData["JoinError"] = "You must be at least 18 years old to join this event.";
+                    ModelState.AddModelError(string.Empty, "Je moet 18 jaar of ouder zijn om aan dit evenement deel te nemen.");
+                    return RedirectToAction("Details", new { id = gameNight.Id });
+                }
+            }
+
+            // Controleer of de gebruiker al deelneemt
             if (!gameNight.Participants.Any(p => p.UserId == userId))
             {
                 var participant = new GameNightParticipant
@@ -72,6 +86,8 @@ namespace BordspelAvond.Controllers
 
             return RedirectToAction("Details", new { id = gameNight.Id });
         }
+
+
 
 
 
@@ -107,7 +123,7 @@ namespace BordspelAvond.Controllers
 
         // POST: GameNight/Create
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("Address,MaxPlayers,DateAndTime")] GameNight gameNight)
+        public async Task<IActionResult> Create([Bind("Address,MaxPlayers,DateAndTime,Is18Plus")] GameNight gameNight)
         {
             _logger.LogInformation("Create POST action called");
 

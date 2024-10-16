@@ -70,6 +70,9 @@ namespace BordspelAvond.Migrations
                     b.Property<DateTime>("DateAndTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("Is18Plus")
+                        .HasColumnType("bit");
+
                     b.Property<int>("MaxPlayers")
                         .HasColumnType("int");
 

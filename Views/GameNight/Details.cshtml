@@ -38,6 +38,19 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.DateAndTime)
         </dd>
+        <dt class="col-sm-2">
+            Age Requirement
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.Is18Plus)
+            {
+                <span class="badge bg-danger">18+</span>
+            }
+            else
+            {
+                <span class="badge bg-success">All Ages</span>
+            }
+        </dd>
     </dl>
 </div>
 
@@ -73,4 +86,16 @@ else
 else if (isOrganizer)
 {
     <p>You cannot delete this Game Night because there are participants.</p>
+}
+
+@section Scripts {
+    <script>
+        // Controleer op foutmelding en toon een alert-popup
+        @if (TempData["JoinError"] != null)
+        {
+            <text>
+                    alert("@TempData["JoinError"]");
+            </text>
+        }
+    </script>
 }

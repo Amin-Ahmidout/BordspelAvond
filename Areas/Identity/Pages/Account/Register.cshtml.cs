@@ -84,7 +84,9 @@ namespace BordspelAvond.Areas.Identity.Pages.Account
             [Display(Name = "Name")]
             public string Name { get; set; }
 
-            
+            [Required]
+            public DateTime BirthDate { get; set; }
+
             public string Gender { get; set; }
             public string City { get; set; }
             public string Street { get; set; }
@@ -130,6 +132,7 @@ namespace BordspelAvond.Areas.Identity.Pages.Account
                 user.Street = Input.Street;
                 user.HouseNumber = Input.HouseNumber;
                 user.City = Input.City;
+                user.BirthDate = Input.BirthDate;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
