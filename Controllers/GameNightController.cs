@@ -149,27 +149,6 @@ namespace BordspelAvond.Controllers
             return View(gameNight);
         }
 
-
-        // GET: GameNight/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                _logger.LogWarning("Edit action called with null id");
-                return NotFound();
-            }
-
-            var gameNight = await _context.GameNights.FindAsync(id);
-            if (gameNight == null)
-            {
-                _logger.LogWarning($"GameNight with id {id} not found for edit");
-                return NotFound();
-            }
-
-            _logger.LogInformation($"Editing GameNight with id {id}");
-            return View(gameNight);
-        }
-
         public async Task<IActionResult> MyParticipatedGames()
         {
             var userId = _userManager.GetUserId(User);
@@ -196,33 +175,89 @@ namespace BordspelAvond.Controllers
             return View(participatedGames);
         }
 
+        // GET: GameNight/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                _logger.LogWarning("Edit action called with null id");
+                return NotFound();
+            }
+
+            var gameNight = await _context.GameNights
+                .Include(g => g.Participants)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (gameNight == null)
+            {
+                _logger.LogWarning($"GameNight with id {id} not found for edit");
+                return NotFound();
+            }
+
+            var organizerId = _userManager.GetUserId(User);
+
+            // Controleer of de gebruiker de organisator is en dat er geen deelnemers zijn
+            if (gameNight.OrganizerId != organizerId)
+            {
+                _logger.LogWarning("User is not authorized to edit this GameNight");
+                return Forbid(); // Gebruiker heeft geen toestemming om te bewerken
+            }
+
+            if (gameNight.Participants.Any())
+            {
+                ModelState.AddModelError(string.Empty, "Cannot edit a Game Night with participants.");
+                return View("Details", gameNight); // Keer terug naar de Details-pagina met foutmelding
+            }
+
+            _logger.LogInformation($"Editing GameNight with id {id}");
+            return View(gameNight);
+        }
 
         // POST: GameNight/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Address,MaxPlayers,DateAndTime")] GameNight gameNight)
         {
+            ModelState.Remove("Organizer");
+
             if (id != gameNight.Id)
             {
                 _logger.LogWarning($"Edit action called with mismatched id {id} for GameNight");
                 return NotFound();
             }
 
+            var existingGameNight = await _context.GameNights
+                .Include(g => g.Participants)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
+            if (existingGameNight == null)
+            {
+                return NotFound();
+            }
+
+            var organizerId = _userManager.GetUserId(User);
+
+            // Controleer of de gebruiker de organisator is en dat er geen deelnemers zijn
+            if (existingGameNight.OrganizerId != organizerId)
+            {
+                return Forbid(); // Gebruiker heeft geen toestemming om te bewerken
+            }
+
+            if (existingGameNight.Participants.Any())
+            {
+                ModelState.AddModelError(string.Empty, "Cannot edit a Game Night with participants.");
+                return RedirectToAction(nameof(Details), new { id = gameNight.Id });
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var organizerId = _userManager.GetUserId(User);
-                    if (organizerId == null)
-                    {
-                        _logger.LogError("Unable to retrieve OrganizerId; user is not logged in during Edit");
-                        ModelState.AddModelError(string.Empty, "Er is een probleem met uw account. Probeer opnieuw in te loggen.");
-                        return View(gameNight);
-                    }
+                    existingGameNight.Address = gameNight.Address;
+                    existingGameNight.MaxPlayers = gameNight.MaxPlayers;
+                    existingGameNight.DateAndTime = gameNight.DateAndTime;
 
-                    gameNight.OrganizerId = organizerId;
-
-                    _context.Update(gameNight);
+                    _context.Update(existingGameNight);
                     await _context.SaveChangesAsync();
                     _logger.LogInformation($"GameNight with id {gameNight.Id} successfully updated");
                 }
@@ -248,6 +283,7 @@ namespace BordspelAvond.Controllers
             return View(gameNight);
         }
 
+
         // GET: GameNight/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -257,7 +293,7 @@ namespace BordspelAvond.Controllers
             }
 
             var gameNight = await _context.GameNights
-                .Include(g => g.Participants) // Include participants to check their count
+                .Include(g => g.Participants) 
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (gameNight == null)
@@ -265,11 +301,10 @@ namespace BordspelAvond.Controllers
                 return NotFound();
             }
 
-            // Check if there are participants
             if (gameNight.Participants.Any())
             {
                 ModelState.AddModelError(string.Empty, "You cannot delete this Game Night because there are participants.");
-                return View("Details", gameNight); // Show details with the error message
+                return View("Details", gameNight); 
             }
 
             return View(gameNight);
@@ -291,13 +326,12 @@ namespace BordspelAvond.Controllers
 
             var organizerId = _userManager.GetUserId(User);
 
-            // Controleren of de ingelogde gebruiker de organisator is
+           
             if (gameNight.OrganizerId != organizerId)
             {
-                return Forbid(); // Verzoek weigeren als de gebruiker niet de organisator is
+                return Forbid(); 
             }
 
-            // Controleren of er geen deelnemers zijn
             if (gameNight.Participants.Any())
             {
                 ModelState.AddModelError(string.Empty, "Cannot delete a Game Night with participants.");
