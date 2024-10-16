@@ -171,6 +171,33 @@ namespace BordspelAvond.Controllers
             return View(gameNight);
         }
 
+        public async Task<IActionResult> MyParticipatedGames()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var participatedGames = await _context.GameNightParticipants
+                .Include(p => p.GameNight)
+                .Where(p => p.UserId == userId)
+                .Select(p => p.GameNight)
+                .ToListAsync();
+
+            if (!participatedGames.Any())
+            {
+                _logger.LogInformation("No participated games found for user {UserId}", userId);
+            }
+            else
+            {
+                _logger.LogInformation("{Count} participated games found for user {UserId}", participatedGames.Count, userId);
+            }
+
+            return View(participatedGames);
+        }
+
+
         // POST: GameNight/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
