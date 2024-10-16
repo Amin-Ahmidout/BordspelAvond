@@ -25,6 +25,22 @@ namespace BordspelAvond.Controllers
             return View(await _context.GameNights.ToListAsync());
         }
 
+        public async Task<IActionResult> MyOrganizedGames()
+        {
+            var organizerId = _userManager.GetUserId(User); 
+            if (organizerId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var organizedGames = await _context.GameNights
+                .Where(g => g.OrganizerId == organizerId)
+                .ToListAsync();
+
+            return View(organizedGames);
+        }
+
+
         // GET: GameNight/Details/5
         public async Task<IActionResult> Details(int? id)
         {
