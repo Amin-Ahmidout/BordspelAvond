@@ -7,14 +7,11 @@ public class BordspelDbContext : DbContext
 
     public DbSet<Game> Games { get; set; }
     public DbSet<GameNight> GameNights { get; set; }
-  
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // Configureren van de many-to-many relatie tussen Game en GameNight zonder cascade delete
         modelBuilder.Entity<GameNight>()
             .HasMany(g => g.PlayedGames)
             .WithMany(g => g.GameNights)
@@ -32,7 +29,12 @@ public class BordspelDbContext : DbContext
                     .OnDelete(DeleteBehavior.Restrict)
             );
 
-      
-       
+        // Remove this foreign key configuration:
+        // modelBuilder.Entity<GameNight>()
+        //    .HasOne(gn => gn.Organizer)
+        //    .WithMany()
+        //    .HasForeignKey(gn => gn.OrganizerId)
+        //    .OnDelete(DeleteBehavior.Restrict);
     }
+
 }

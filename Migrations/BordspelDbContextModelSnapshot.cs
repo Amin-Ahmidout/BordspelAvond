@@ -74,7 +74,6 @@ namespace BordspelAvond.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("OrganizerId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

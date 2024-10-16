@@ -1,4 +1,7 @@
+using BordspelAvond.Application.Interfaces;
+using BordspelAvond.Application.Services;
 using BordspelAvond.Data;
+using BordspelAvond.Infrastructure;
 using BordspelAvond.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +42,9 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 // Identity configureren met AuthDbContext
 builder.Services.AddDefaultIdentity<Player>()
     .AddEntityFrameworkStores<AuthDbContext>();
+
+builder.Services.AddScoped<IGameNightService, GameNightService>();
+builder.Services.AddScoped<IGameNightRepository, GameNightRepository>();
 
 builder.Services.AddControllersWithViews();
 

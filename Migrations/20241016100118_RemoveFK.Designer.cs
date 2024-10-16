@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BordspelAvond.Migrations
 {
     [DbContext(typeof(BordspelDbContext))]
-    [Migration("20241011092336_InitialSetupClean2")]
-    partial class InitialSetupClean2
+    [Migration("20241016100118_RemoveFK")]
+    partial class RemoveFK
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,7 +77,6 @@ namespace BordspelAvond.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("OrganizerId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
