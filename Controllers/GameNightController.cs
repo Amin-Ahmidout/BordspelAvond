@@ -42,7 +42,7 @@ namespace BordspelAvond.Controllers
 
         public async Task<IActionResult> Join(int id)
         {
-            var userId = _userManager.GetUserId(User); // UserId ophalen uit AuthDb
+            var userId = _userManager.GetUserId(User); 
             if (userId == null)
             {
                 return RedirectToAction("Login", "Account");
@@ -85,7 +85,7 @@ namespace BordspelAvond.Controllers
             }
 
             var gameNight = await _context.GameNights
-                .Include(g => g.Participants) // Haal de deelnemers op
+                .Include(g => g.Participants) 
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (gameNight == null)
@@ -111,12 +111,12 @@ namespace BordspelAvond.Controllers
         {
             _logger.LogInformation("Create POST action called");
 
-            // Remove "Organizer" from ModelState to skip validation as it's not a mapped field.
+        
             ModelState.Remove("Organizer");
 
             if (ModelState.IsValid)
             {
-                // Get the current user's ID from AuthDb and assign it to OrganizerId in GameNight.
+             
                 var organizerId = _userManager.GetUserId(User);
                 if (organizerId == null)
                 {
@@ -128,7 +128,6 @@ namespace BordspelAvond.Controllers
                 _logger.LogInformation($"OrganizerId retrieved: {organizerId}");
                 gameNight.OrganizerId = organizerId;
 
-                // Add GameNight entity to the context and save it to BordspelDb.
                 _context.Add(gameNight);
                 try
                 {
@@ -248,6 +247,68 @@ namespace BordspelAvond.Controllers
 
             return View(gameNight);
         }
+
+        // GET: GameNight/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var gameNight = await _context.GameNights
+                .Include(g => g.Participants) // Include participants to check their count
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (gameNight == null)
+            {
+                return NotFound();
+            }
+
+            // Check if there are participants
+            if (gameNight.Participants.Any())
+            {
+                ModelState.AddModelError(string.Empty, "You cannot delete this Game Night because there are participants.");
+                return View("Details", gameNight); // Show details with the error message
+            }
+
+            return View(gameNight);
+        }
+
+        // POST: GameNight/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var gameNight = await _context.GameNights
+                .Include(g => g.Participants)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
+            if (gameNight == null)
+            {
+                return NotFound();
+            }
+
+            var organizerId = _userManager.GetUserId(User);
+
+            // Controleren of de ingelogde gebruiker de organisator is
+            if (gameNight.OrganizerId != organizerId)
+            {
+                return Forbid(); // Verzoek weigeren als de gebruiker niet de organisator is
+            }
+
+            // Controleren of er geen deelnemers zijn
+            if (gameNight.Participants.Any())
+            {
+                ModelState.AddModelError(string.Empty, "Cannot delete a Game Night with participants.");
+                return RedirectToAction(nameof(Details), new { id = gameNight.Id });
+            }
+
+            _context.GameNights.Remove(gameNight);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
 
         private bool GameNightExists(int id)
         {
