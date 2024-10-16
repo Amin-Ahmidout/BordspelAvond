@@ -40,6 +40,40 @@ namespace BordspelAvond.Controllers
             return View(organizedGames);
         }
 
+        public async Task<IActionResult> Join(int id)
+        {
+            var userId = _userManager.GetUserId(User); // UserId ophalen uit AuthDb
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var gameNight = await _context.GameNights
+                .Include(g => g.Participants)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
+            if (gameNight == null)
+            {
+                return NotFound();
+            }
+
+            // Check of gebruiker al deelneemt
+            if (!gameNight.Participants.Any(p => p.UserId == userId))
+            {
+                var participant = new GameNightParticipant
+                {
+                    GameNightId = gameNight.Id,
+                    UserId = userId
+                };
+
+                _context.GameNightParticipants.Add(participant);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Details", new { id = gameNight.Id });
+        }
+
+
 
         // GET: GameNight/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -50,7 +84,10 @@ namespace BordspelAvond.Controllers
                 return NotFound();
             }
 
-            var gameNight = await _context.GameNights.FirstOrDefaultAsync(m => m.Id == id);
+            var gameNight = await _context.GameNights
+                .Include(g => g.Participants) // Haal de deelnemers op
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (gameNight == null)
             {
                 _logger.LogWarning($"GameNight with id {id} not found");

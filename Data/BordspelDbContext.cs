@@ -7,6 +7,7 @@ public class BordspelDbContext : DbContext
 
     public DbSet<Game> Games { get; set; }
     public DbSet<GameNight> GameNights { get; set; }
+    public DbSet<GameNightParticipant> GameNightParticipants { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,6 +29,14 @@ public class BordspelDbContext : DbContext
                     .HasForeignKey("GameNightId")
                     .OnDelete(DeleteBehavior.Restrict)
             );
+
+        modelBuilder.Entity<GameNightParticipant>()
+        .HasKey(gp => new { gp.GameNightId, gp.UserId });
+
+        modelBuilder.Entity<GameNightParticipant>()
+            .HasOne(gp => gp.GameNight)
+            .WithMany(g => g.Participants)
+            .HasForeignKey(gp => gp.GameNightId);
 
         // Remove this foreign key configuration:
         // modelBuilder.Entity<GameNight>()

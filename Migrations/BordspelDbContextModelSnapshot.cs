@@ -81,6 +81,19 @@ namespace BordspelAvond.Migrations
                     b.ToTable("GameNights");
                 });
 
+            modelBuilder.Entity("BordspelAvond.Models.GameNightParticipant", b =>
+                {
+                    b.Property<int>("GameNightId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("GameNightId", "UserId");
+
+                    b.ToTable("GameNightParticipants");
+                });
+
             modelBuilder.Entity("GameGameNight", b =>
                 {
                     b.Property<int>("GameId")
@@ -96,6 +109,17 @@ namespace BordspelAvond.Migrations
                     b.ToTable("GameGameNight");
                 });
 
+            modelBuilder.Entity("BordspelAvond.Models.GameNightParticipant", b =>
+                {
+                    b.HasOne("BordspelAvond.Models.GameNight", "GameNight")
+                        .WithMany("Participants")
+                        .HasForeignKey("GameNightId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GameNight");
+                });
+
             modelBuilder.Entity("GameGameNight", b =>
                 {
                     b.HasOne("BordspelAvond.Models.Game", null)
@@ -109,6 +133,11 @@ namespace BordspelAvond.Migrations
                         .HasForeignKey("GameNightId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("BordspelAvond.Models.GameNight", b =>
+                {
+                    b.Navigation("Participants");
                 });
 #pragma warning restore 612, 618
         }
