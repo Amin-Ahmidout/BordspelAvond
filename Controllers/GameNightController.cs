@@ -88,6 +88,9 @@ namespace BordspelAvond.Controllers
         }
 
 
+
+
+
         // GET: GameNight/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -99,8 +102,8 @@ namespace BordspelAvond.Controllers
 
             var gameNight = await _context.GameNights
                 .Include(g => g.Participants)
-                .Include(g => g.GameNightGames)
-                    .ThenInclude(gng => gng.Game)
+                .Include(g => g.GameNightGames) 
+                    .ThenInclude(gng => gng.Game) 
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (gameNight == null)
@@ -109,9 +112,8 @@ namespace BordspelAvond.Controllers
                 return NotFound();
             }
 
-            ViewBag.AvailableGames = await _context.Games
-                .Where(g => !gameNight.GameNightGames.Any(gng => gng.GameId == g.Id))
-                .ToListAsync();
+            
+            ViewBag.AvailableGames = await _context.Games.ToListAsync();
 
             _logger.LogInformation($"Displaying details for GameNight with id {id}");
             return View(gameNight);

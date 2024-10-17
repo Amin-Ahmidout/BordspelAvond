@@ -90,7 +90,7 @@ else if (isOrganizer)
     @foreach (var gameNightGame in Model.GameNightGames)
     {
         <li>
-            <strong>@gameNightGame.Game.Name</strong> - @gameNightGame.Game.Description
+            <strong>@gameNightGame.Game.Name</strong>
             <a asp-controller="Game" asp-action="Details" asp-route-id="@gameNightGame.Game.Id" class="btn btn-info">Details</a>
         </li>
     }
