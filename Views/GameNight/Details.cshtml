@@ -4,8 +4,8 @@
 
 @{
     ViewData["Title"] = "GameNight Details";
-    var currentUserId = _userManager.GetUserId(User); // Huidige gebruiker ophalen
-    var isOrganizer = Model.OrganizerId == currentUserId; // Controleren of huidige gebruiker de organisator is
+    var currentUserId = _userManager.GetUserId(User); 
+    var isOrganizer = Model.OrganizerId == currentUserId; 
 }
 
 <h1>GameNight Details</h1>
@@ -67,7 +67,7 @@
         @foreach (var participant in Model.Participants)
         {
             var user = await _userManager.FindByIdAsync(participant.UserId);
-            <li>@user?.UserName</li> <!-- Toont de gebruikersnaam van de deelnemer -->
+            <li>@user?.UserName</li> 
         }
     </ul>
 }
@@ -78,7 +78,7 @@ else
 
 @if (isOrganizer && !Model.Participants.Any())
 {
-    <!-- Delete button is alleen zichtbaar voor de organisator en wanneer er geen deelnemers zijn -->
+    
     <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure you want to delete this game night?');">
         <button type="submit" class="btn btn-danger">Delete</button>
     </form>

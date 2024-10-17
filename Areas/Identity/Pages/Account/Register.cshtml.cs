@@ -123,10 +123,20 @@ namespace BordspelAvond.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
             if (ModelState.IsValid)
             {
-                var user = CreateUser();
+                var today = DateTime.Today;
+                var age = today.Year - Input.BirthDate.Year;
+                if (Input.BirthDate.Date > today.AddYears(-age)) age--; 
 
+                if (age < 16)
+                {
+                    ModelState.AddModelError(string.Empty, "You must be at least 16 years old to register.");
+                    return Page(); 
+                }
+
+                var user = CreateUser();
                 user.Name = Input.Name;
                 user.Gender = Input.Gender;
                 user.Street = Input.Street;
@@ -169,10 +179,9 @@ namespace BordspelAvond.Areas.Identity.Pages.Account
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-
-            // If we got this far, something failed, redisplay form
             return Page();
         }
+
 
         private Player CreateUser()
         {
