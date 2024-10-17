@@ -88,9 +88,6 @@ namespace BordspelAvond.Controllers
         }
 
 
-
-
-
         // GET: GameNight/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -102,8 +99,8 @@ namespace BordspelAvond.Controllers
 
             var gameNight = await _context.GameNights
                 .Include(g => g.Participants)
-                .Include(g => g.GameNightGames) 
-                    .ThenInclude(gng => gng.Game) 
+                .Include(g => g.GameNightGames)
+                    .ThenInclude(gng => gng.Game)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (gameNight == null)
@@ -112,8 +109,9 @@ namespace BordspelAvond.Controllers
                 return NotFound();
             }
 
-            
-            ViewBag.AvailableGames = await _context.Games.ToListAsync();
+            ViewBag.AvailableGames = await _context.Games
+                .Where(g => !gameNight.GameNightGames.Any(gng => gng.GameId == g.Id))
+                .ToListAsync();
 
             _logger.LogInformation($"Displaying details for GameNight with id {id}");
             return View(gameNight);
@@ -365,6 +363,7 @@ namespace BordspelAvond.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
         public async Task<IActionResult> AddGameToGameNight(int gameNightId, int gameId)
         {
             var gameNight = await _context.GameNights
@@ -377,16 +376,22 @@ namespace BordspelAvond.Controllers
                 return NotFound();
             }
 
-            if (!gameNight.GameNightGames.Any(gng => gng.GameId == gameId))
+         
+            if (gameNight.GameNightGames.Any(gng => gng.GameId == gameId))
+            {
+                TempData["GameAddError"] = "Game is already added to this GameNight.";
+            }
+            else
             {
                 gameNight.GameNightGames.Add(new GameNightGame { GameNightId = gameNightId, GameId = gameId });
                 await _context.SaveChangesAsync();
+                TempData["GameAddSuccess"] = $"{game.Name} added to GameNight!";
             }
 
             return RedirectToAction("Details", new { id = gameNightId });
         }
 
-        
+
 
 
         private bool GameNightExists(int id)
