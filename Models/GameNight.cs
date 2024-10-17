@@ -13,7 +13,7 @@ namespace BordspelAvond.Models
         public int MaxPlayers { get; set; }
         public DateTime DateAndTime { get; set; }
         public bool Is18Plus { get; set; }
-        public List<Game> PlayedGames { get; set; } = new List<Game>();
+        public List<GameNightGame> GameNightGames { get; set; } = new List<GameNightGame>();
         public ICollection<GameNightParticipant> Participants { get; set; } = new List<GameNightParticipant>();
     }
 }

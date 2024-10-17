@@ -101,7 +101,9 @@ namespace BordspelAvond.Controllers
             }
 
             var gameNight = await _context.GameNights
-                .Include(g => g.Participants) 
+                .Include(g => g.Participants)
+                .Include(g => g.GameNightGames) 
+                    .ThenInclude(gng => gng.Game) 
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (gameNight == null)
@@ -110,9 +112,13 @@ namespace BordspelAvond.Controllers
                 return NotFound();
             }
 
+            
+            ViewBag.AvailableGames = await _context.Games.ToListAsync();
+
             _logger.LogInformation($"Displaying details for GameNight with id {id}");
             return View(gameNight);
         }
+
 
         // GET: GameNight/Create
         public IActionResult Create()
@@ -358,6 +364,29 @@ namespace BordspelAvond.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        public async Task<IActionResult> AddGameToGameNight(int gameNightId, int gameId)
+        {
+            var gameNight = await _context.GameNights
+                .Include(g => g.GameNightGames)
+                .FirstOrDefaultAsync(g => g.Id == gameNightId);
+            var game = await _context.Games.FindAsync(gameId);
+
+            if (gameNight == null || game == null)
+            {
+                return NotFound();
+            }
+
+            if (!gameNight.GameNightGames.Any(gng => gng.GameId == gameId))
+            {
+                gameNight.GameNightGames.Add(new GameNightGame { GameNightId = gameNightId, GameId = gameId });
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Details", new { id = gameNightId });
+        }
+
+        
 
 
         private bool GameNightExists(int id)

@@ -33,8 +33,9 @@ namespace BordspelAvond.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Genre")
-                        .HasColumnType("int");
+                    b.Property<string>("Genre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -44,8 +45,9 @@ namespace BordspelAvond.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("is18Plus")
                         .HasColumnType("bit");
@@ -70,6 +72,9 @@ namespace BordspelAvond.Migrations
                     b.Property<DateTime>("DateAndTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("GameId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Is18Plus")
                         .HasColumnType("bit");
 
@@ -81,7 +86,24 @@ namespace BordspelAvond.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GameId");
+
                     b.ToTable("GameNights");
+                });
+
+            modelBuilder.Entity("BordspelAvond.Models.GameNightGame", b =>
+                {
+                    b.Property<int>("GameNightId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
+
+                    b.HasKey("GameNightId", "GameId");
+
+                    b.HasIndex("GameId");
+
+                    b.ToTable("GameNightGames");
                 });
 
             modelBuilder.Entity("BordspelAvond.Models.GameNightParticipant", b =>
@@ -97,19 +119,30 @@ namespace BordspelAvond.Migrations
                     b.ToTable("GameNightParticipants");
                 });
 
-            modelBuilder.Entity("GameGameNight", b =>
+            modelBuilder.Entity("BordspelAvond.Models.GameNight", b =>
                 {
-                    b.Property<int>("GameId")
-                        .HasColumnType("int");
+                    b.HasOne("BordspelAvond.Models.Game", null)
+                        .WithMany("GameNights")
+                        .HasForeignKey("GameId");
+                });
 
-                    b.Property<int>("GameNightId")
-                        .HasColumnType("int");
+            modelBuilder.Entity("BordspelAvond.Models.GameNightGame", b =>
+                {
+                    b.HasOne("BordspelAvond.Models.Game", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasKey("GameId", "GameNightId");
+                    b.HasOne("BordspelAvond.Models.GameNight", "GameNight")
+                        .WithMany("GameNightGames")
+                        .HasForeignKey("GameNightId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasIndex("GameNightId");
+                    b.Navigation("Game");
 
-                    b.ToTable("GameGameNight");
+                    b.Navigation("GameNight");
                 });
 
             modelBuilder.Entity("BordspelAvond.Models.GameNightParticipant", b =>
@@ -123,23 +156,15 @@ namespace BordspelAvond.Migrations
                     b.Navigation("GameNight");
                 });
 
-            modelBuilder.Entity("GameGameNight", b =>
+            modelBuilder.Entity("BordspelAvond.Models.Game", b =>
                 {
-                    b.HasOne("BordspelAvond.Models.Game", null)
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("BordspelAvond.Models.GameNight", null)
-                        .WithMany()
-                        .HasForeignKey("GameNightId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("GameNights");
                 });
 
             modelBuilder.Entity("BordspelAvond.Models.GameNight", b =>
                 {
+                    b.Navigation("GameNightGames");
+
                     b.Navigation("Participants");
                 });
 #pragma warning restore 612, 618

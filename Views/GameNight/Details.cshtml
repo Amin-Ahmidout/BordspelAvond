@@ -88,6 +88,26 @@ else if (isOrganizer)
     <p>You cannot delete this Game Night because there are participants.</p>
 }
 
+<h3>Add Game to GameNight</h3>
+<form asp-action="AddGameToGameNight" method="post">
+    <input type="hidden" name="gameNightId" value="@Model.Id" />
+    <select name="gameId" class="form-select">
+        @foreach (var game in ViewBag.AvailableGames)
+        {
+            <option value="@game.Id">@game.Name</option>
+        }
+    </select>
+    <button type="submit" class="btn btn-primary">Add Game</button>
+</form>
+
+<h4>Games in this GameNight</h4>
+<ul>
+    @foreach (var gameNightGame in Model.GameNightGames)
+    {
+        <li>@gameNightGame.Game.Name</li>
+    }
+</ul>
+
 @section Scripts {
     <script>
         // Controleer op foutmelding en toon een alert-popup
