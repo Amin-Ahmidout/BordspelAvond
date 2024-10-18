@@ -57,12 +57,17 @@ namespace BordspelAvond.Controllers
                 return NotFound();
             }
 
-            // Controleer of de gebruiker ouder is dan 18 als het een 18+ event is
+            if (gameNight.Participants.Count >= gameNight.MaxPlayers)
+            {
+                TempData["JoinError"] = "This GameNight is full. No more players can join.";
+                return RedirectToAction("Details", new { id = gameNight.Id });
+            }
+
             var user = await _userManager.FindByIdAsync(userId);
             if (gameNight.Is18Plus)
             {
                 var age = DateTime.Today.Year - user.BirthDate.Year;
-                if (user.BirthDate.Date > DateTime.Today.AddYears(-age)) age--; // Corrigeer voor nog niet verjaarde gebruikers
+                if (user.BirthDate.Date > DateTime.Today.AddYears(-age)) age--; 
                 if (age < 18)
                 {
                     TempData["JoinError"] = "You must be at least 18 years old to join this event.";
@@ -259,10 +264,9 @@ namespace BordspelAvond.Controllers
 
             var organizerId = _userManager.GetUserId(User);
 
-            // Controleer of de gebruiker de organisator is en dat er geen deelnemers zijn
             if (existingGameNight.OrganizerId != organizerId)
             {
-                return Forbid(); // Gebruiker heeft geen toestemming om te bewerken
+                return Forbid(); 
             }
 
             if (existingGameNight.Participants.Any())
