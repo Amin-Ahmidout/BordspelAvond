@@ -57,6 +57,7 @@ namespace BordspelAvond.Controllers
                 return NotFound();
             }
 
+            // Controleer of het maximaal aantal spelers is bereikt
             if (gameNight.Participants.Count >= gameNight.MaxPlayers)
             {
                 TempData["JoinError"] = "This GameNight is full. No more players can join.";
@@ -64,16 +65,27 @@ namespace BordspelAvond.Controllers
             }
 
             var user = await _userManager.FindByIdAsync(userId);
+
+            // Controleer de leeftijdsrestrictie
             if (gameNight.Is18Plus)
             {
                 var age = DateTime.Today.Year - user.BirthDate.Year;
-                if (user.BirthDate.Date > DateTime.Today.AddYears(-age)) age--; 
+                if (user.BirthDate.Date > DateTime.Today.AddYears(-age)) age--;
                 if (age < 18)
                 {
                     TempData["JoinError"] = "You must be at least 18 years old to join this event.";
-                    ModelState.AddModelError(string.Empty, "Je moet 18 jaar of ouder zijn om aan dit evenement deel te nemen.");
                     return RedirectToAction("Details", new { id = gameNight.Id });
                 }
+            }
+
+            // Controleer dieetwensen tegen de beschikbare opties op de GameNight
+            if ((user.IsVegetarian && !gameNight.ProvidesVegetarianOptions) ||
+                (user.HasLactoseAllergy && !gameNight.ProvidesLactoseFreeOptions) ||
+                (user.HasNutsAllergy && !gameNight.ProvidesNutsFreeOptions) ||
+                (user.AvoidsAlcohol && !gameNight.ProvidesAlcoholFreeOptions))
+            {
+                TempData["JoinError"] = "The available food and drink options do not meet your dietary requirements.";
+                return RedirectToAction("Details", new { id = gameNight.Id });
             }
 
             // Controleer of de gebruiker al deelneemt
@@ -91,6 +103,7 @@ namespace BordspelAvond.Controllers
 
             return RedirectToAction("Details", new { id = gameNight.Id });
         }
+
 
 
 
@@ -134,16 +147,14 @@ namespace BordspelAvond.Controllers
 
         // POST: GameNight/Create
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("Address,MaxPlayers,DateAndTime,Is18Plus")] GameNight gameNight)
+        public async Task<IActionResult> Create([Bind("Address,MaxPlayers,DateAndTime,Is18Plus,ProvidesVegetarianOptions,ProvidesLactoseFreeOptions,ProvidesNutsFreeOptions,ProvidesAlcoholFreeOptions")] GameNight gameNight)
         {
             _logger.LogInformation("Create POST action called");
 
-        
             ModelState.Remove("Organizer");
 
             if (ModelState.IsValid)
             {
-             
                 var organizerId = _userManager.GetUserId(User);
                 if (organizerId == null)
                 {
@@ -175,6 +186,7 @@ namespace BordspelAvond.Controllers
 
             return View(gameNight);
         }
+
 
         public async Task<IActionResult> MyParticipatedGames()
         {
@@ -240,10 +252,11 @@ namespace BordspelAvond.Controllers
             return View(gameNight);
         }
 
+
         // POST: GameNight/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Address,MaxPlayers,DateAndTime")] GameNight gameNight)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Address,MaxPlayers,DateAndTime,ProvidesVegetarianOptions,ProvidesLactoseFreeOptions,ProvidesNutFreeOptions,ProvidesAlcoholFreeOptions")] GameNight gameNight)
         {
             ModelState.Remove("Organizer");
 
@@ -266,7 +279,7 @@ namespace BordspelAvond.Controllers
 
             if (existingGameNight.OrganizerId != organizerId)
             {
-                return Forbid(); 
+                return Forbid();
             }
 
             if (existingGameNight.Participants.Any())
@@ -282,6 +295,12 @@ namespace BordspelAvond.Controllers
                     existingGameNight.Address = gameNight.Address;
                     existingGameNight.MaxPlayers = gameNight.MaxPlayers;
                     existingGameNight.DateAndTime = gameNight.DateAndTime;
+
+                    // Update de dieetopties
+                    existingGameNight.ProvidesVegetarianOptions = gameNight.ProvidesVegetarianOptions;
+                    existingGameNight.ProvidesLactoseFreeOptions = gameNight.ProvidesLactoseFreeOptions;
+                    existingGameNight.ProvidesNutsFreeOptions = gameNight.ProvidesNutsFreeOptions;
+                    existingGameNight.ProvidesAlcoholFreeOptions = gameNight.ProvidesAlcoholFreeOptions;
 
                     _context.Update(existingGameNight);
                     await _context.SaveChangesAsync();

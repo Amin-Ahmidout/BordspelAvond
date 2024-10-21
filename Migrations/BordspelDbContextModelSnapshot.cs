@@ -84,6 +84,18 @@ namespace BordspelAvond.Migrations
                     b.Property<string>("OrganizerId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("ProvidesAlcoholFreeOptions")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ProvidesLactoseFreeOptions")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ProvidesNutsFreeOptions")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ProvidesVegetarianOptions")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.HasIndex("GameId");

@@ -91,6 +91,10 @@ namespace BordspelAvond.Areas.Identity.Pages.Account
             public string City { get; set; }
             public string Street { get; set; }
             public string HouseNumber { get; set; }
+            public bool IsVegetarian { get; set; }
+            public bool HasLactoseAllergy { get; set; }
+            public bool HasNutsAllergy { get; set; }
+            public bool AvoidsAlcohol { get; set; }
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -143,6 +147,10 @@ namespace BordspelAvond.Areas.Identity.Pages.Account
                 user.HouseNumber = Input.HouseNumber;
                 user.City = Input.City;
                 user.BirthDate = Input.BirthDate;
+                user.IsVegetarian = Input.IsVegetarian;
+                user.HasLactoseAllergy = Input.HasLactoseAllergy;
+                user.HasNutsAllergy = Input.HasNutsAllergy;
+                user.AvoidsAlcohol = Input.AvoidsAlcohol;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);

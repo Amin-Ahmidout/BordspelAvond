@@ -13,6 +13,10 @@ namespace BordspelAvond.Models
         public int MaxPlayers { get; set; }
         public DateTime DateAndTime { get; set; }
         public bool Is18Plus { get; set; }
+        public bool ProvidesVegetarianOptions { get; set; }
+        public bool ProvidesLactoseFreeOptions { get; set; }
+        public bool ProvidesNutsFreeOptions { get; set; }
+        public bool ProvidesAlcoholFreeOptions { get; set; }
         public List<GameNightGame> GameNightGames { get; set; } = new List<GameNightGame>();
         public ICollection<GameNightParticipant> Participants { get; set; } = new List<GameNightParticipant>();
     }

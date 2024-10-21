@@ -30,6 +30,9 @@ namespace BordspelAvond.Migrations.AuthDb
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<bool>("AvoidsAlcohol")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
 
@@ -52,9 +55,18 @@ namespace BordspelAvond.Migrations.AuthDb
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("HasLactoseAllergy")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HasNutsAllergy")
+                        .HasColumnType("bit");
+
                     b.Property<string>("HouseNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsVegetarian")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");

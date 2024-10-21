@@ -14,6 +14,10 @@ namespace BordspelAvond.Models
         public string Street { get; set; }
         public string HouseNumber { get; set; }
         public string City { get; set; }
+        public bool IsVegetarian { get; set; }
+        public bool HasLactoseAllergy { get; set; }
+        public bool HasNutsAllergy { get; set; }
+        public bool AvoidsAlcohol { get; set; }
 
     }
 }
