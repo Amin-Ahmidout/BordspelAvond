@@ -1,15 +1,20 @@
 ﻿using BordspelAvond.Application.Interfaces;
 using BordspelAvond.Models;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BordspelAvond.Application.Services
 {
     public class GameNightService : IGameNightService
     {
         private readonly IGameNightRepository _gameNightRepository;
+        
 
         public GameNightService(IGameNightRepository gameNightRepository)
         {
             _gameNightRepository = gameNightRepository;
+            
         }
 
         public async Task<IEnumerable<GameNight>> GetAllGameNightsAsync()
@@ -40,6 +45,28 @@ namespace BordspelAvond.Application.Services
         public async Task DeleteGameNightAsync(int id)
         {
             await _gameNightRepository.DeleteAsync(id);
+        }
+
+        public async Task AddParticipantAsync(int gameNightId, string userId)
+        {
+
+            var gameNight = await _gameNightRepository.GetByIdAsync(gameNightId);
+            if (gameNight != null)
+            {
+                var participant = new GameNightParticipant
+                {
+                    GameNightId = gameNightId,
+                    UserId = userId
+                };
+                gameNight.Participants.Add(participant);
+
+                await _gameNightRepository.UpdateAsync(gameNight);
+            }
+        }
+
+        public Task<IEnumerable<Game>> GetAvailableGamesAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

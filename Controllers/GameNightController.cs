@@ -1,4 +1,6 @@
-﻿using BordspelAvond.Models;
+﻿using BordspelAvond.Application.Interfaces;
+using BordspelAvond.Application.Services;
+using BordspelAvond.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,12 +10,14 @@ namespace BordspelAvond.Controllers
     public class GameNightController : Controller
     {
         private readonly BordspelDbContext _context;
+        private readonly IGameNightService _gameNightService;
         private readonly UserManager<Player> _userManager;
         private readonly ILogger<GameNightController> _logger;
 
-        public GameNightController(BordspelDbContext context, UserManager<Player> userManager, ILogger<GameNightController> logger)
+        public GameNightController(BordspelDbContext context, IGameNightService gameNightService, UserManager<Player> userManager, ILogger<GameNightController> logger)
         {
             _context = context;
+            _gameNightService = gameNightService;
             _userManager = userManager;
             _logger = logger;
         }
@@ -22,21 +26,20 @@ namespace BordspelAvond.Controllers
         public async Task<IActionResult> Index()
         {
             _logger.LogInformation("Index action called");
-            return View(await _context.GameNights.ToListAsync());
+            var gameNights = await _gameNightService.GetAllGameNightsAsync();
+            return View(gameNights);
         }
+
 
         public async Task<IActionResult> MyOrganizedGames()
         {
-            var organizerId = _userManager.GetUserId(User); 
+            var organizerId = _userManager.GetUserId(User);
             if (organizerId == null)
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            var organizedGames = await _context.GameNights
-                .Where(g => g.OrganizerId == organizerId)
-                .ToListAsync();
-
+            var organizedGames = await _gameNightService.GetGameNightsByOrganizerAsync(organizerId);
             return View(organizedGames);
         }
 
@@ -48,9 +51,7 @@ namespace BordspelAvond.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var gameNight = await _context.GameNights
-                .Include(g => g.Participants)
-                .FirstOrDefaultAsync(g => g.Id == id);
+            var gameNight = await _gameNightService.GetGameNightByIdAsync(id);
 
             if (gameNight == null)
             {
@@ -91,14 +92,7 @@ namespace BordspelAvond.Controllers
             // Controleer of de gebruiker al deelneemt
             if (!gameNight.Participants.Any(p => p.UserId == userId))
             {
-                var participant = new GameNightParticipant
-                {
-                    GameNightId = gameNight.Id,
-                    UserId = userId
-                };
-
-                _context.GameNightParticipants.Add(participant);
-                await _context.SaveChangesAsync();
+                await _gameNightService.AddParticipantAsync(gameNight.Id, userId);
             }
 
             return RedirectToAction("Details", new { id = gameNight.Id });

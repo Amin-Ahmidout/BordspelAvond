@@ -15,12 +15,12 @@ namespace BordspelAvond.Infrastructure
 
         public async Task<IEnumerable<GameNight>> GetAllAsync()
         {
-            return await _context.GameNights.Include(g => g.Organizer).ToListAsync();
+            return await _context.GameNights.ToListAsync();
         }
 
         public async Task<GameNight> GetByIdAsync(int id)
         {
-            return await _context.GameNights.Include(g => g.Organizer).FirstOrDefaultAsync(g => g.Id == id);
+            return await _context.GameNights.FirstOrDefaultAsync(g => g.Id == id);
         }
 
         public async Task<IEnumerable<GameNight>> GetByOrganizerIdAsync(string organizerId)
