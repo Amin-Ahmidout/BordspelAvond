@@ -108,6 +108,26 @@ namespace BordspelAvond.Application.Services
             return gameNight;
         }
 
+        public async Task<(bool Success, string ErrorMessage)> CreateGameNightAsync(GameNight gameNight, string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                return (false, "There is an issue with your account. Please log in again.");
+            }
+
+            gameNight.OrganizerId = userId;
+
+            try
+            {
+                await _gameNightRepository.AddAsync(gameNight);
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, "An error occurred while saving the game night. Please try again.");
+            }
+        }
+
 
 
 

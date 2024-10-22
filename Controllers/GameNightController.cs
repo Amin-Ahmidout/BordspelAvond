@@ -105,27 +105,15 @@ namespace BordspelAvond.Controllers
             if (ModelState.IsValid)
             {
                 var organizerId = _userManager.GetUserId(User);
-                if (organizerId == null)
-                {
-                    _logger.LogError("Unable to retrieve OrganizerId; user is not logged in");
-                    ModelState.AddModelError(string.Empty, "There is an issue with your account. Please log in again.");
-                    return View(gameNight);
-                }
+                var (success, errorMessage) = await _gameNightService.CreateGameNightAsync(gameNight, organizerId);
 
-                _logger.LogInformation($"OrganizerId retrieved: {organizerId}");
-                gameNight.OrganizerId = organizerId;
-
-                _context.Add(gameNight);
-                try
+                if (success)
                 {
-                    await _context.SaveChangesAsync();
-                    _logger.LogInformation($"GameNight successfully created with id {gameNight.Id}");
                     return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.LogError(ex, "Error occurred while creating GameNight");
-                    ModelState.AddModelError(string.Empty, "An error occurred while saving the game night. Please try again.");
+                    ModelState.AddModelError(string.Empty, errorMessage);
                 }
             }
             else

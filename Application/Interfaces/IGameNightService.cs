@@ -16,5 +16,6 @@ namespace BordspelAvond.Application.Interfaces
         Task<(bool Success, string ErrorMessage)> JoinGameNightAsync(int gameNightId, string userId);
         Task<IEnumerable<Game>> GetAvailableGamesAsync();
         Task<GameNight> GetGameNightDetailsAsync(int id);
+        Task<(bool Success, string ErrorMessage)> CreateGameNightAsync(GameNight gameNight, string userId);
     }
 }
