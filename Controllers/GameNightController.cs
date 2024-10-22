@@ -148,109 +148,32 @@ namespace BordspelAvond.Controllers
                 return NotFound();
             }
 
-            var gameNight = await _context.GameNights
-                .Include(g => g.Participants)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var userId = _userManager.GetUserId(User);
+            var gameNight = await _gameNightService.GetGameNightForEditAsync(id.Value, userId);
 
             if (gameNight == null)
             {
-                _logger.LogWarning($"GameNight with id {id} not found for edit");
-                return NotFound();
+                return Forbid(); // Of NotFound, afhankelijk van wat je wilt teruggeven bij ongeldig toegang
             }
 
-            var organizerId = _userManager.GetUserId(User);
-
-            // Controleer of de gebruiker de organisator is en dat er geen deelnemers zijn
-            if (gameNight.OrganizerId != organizerId)
-            {
-                _logger.LogWarning("User is not authorized to edit this GameNight");
-                return Forbid(); // Gebruiker heeft geen toestemming om te bewerken
-            }
-
-            if (gameNight.Participants.Any())
-            {
-                ModelState.AddModelError(string.Empty, "Cannot edit a Game Night with participants.");
-                return View("Details", gameNight); // Keer terug naar de Details-pagina met foutmelding
-            }
-
-            _logger.LogInformation($"Editing GameNight with id {id}");
             return View(gameNight);
         }
-
 
         // POST: GameNight/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Address,MaxPlayers,DateAndTime,ProvidesVegetarianOptions,ProvidesLactoseFreeOptions,ProvidesNutFreeOptions,ProvidesAlcoholFreeOptions")] GameNight gameNight)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Address,MaxPlayers,DateAndTime,ProvidesVegetarianOptions,ProvidesLactoseFreeOptions,ProvidesNutsFreeOptions,ProvidesAlcoholFreeOptions")] GameNight gameNight)
         {
-            ModelState.Remove("Organizer");
+            var userId = _userManager.GetUserId(User);
+            var (success, errorMessage, existingGameNight) = await _gameNightService.EditGameNightAsync(id, gameNight, userId);
 
-            if (id != gameNight.Id)
+            if (!success)
             {
-                _logger.LogWarning($"Edit action called with mismatched id {id} for GameNight");
-                return NotFound();
+                ModelState.AddModelError(string.Empty, errorMessage);
+                return View(existingGameNight ?? gameNight);
             }
 
-            var existingGameNight = await _context.GameNights
-                .Include(g => g.Participants)
-                .FirstOrDefaultAsync(g => g.Id == id);
-
-            if (existingGameNight == null)
-            {
-                return NotFound();
-            }
-
-            var organizerId = _userManager.GetUserId(User);
-
-            if (existingGameNight.OrganizerId != organizerId)
-            {
-                return Forbid();
-            }
-
-            if (existingGameNight.Participants.Any())
-            {
-                ModelState.AddModelError(string.Empty, "Cannot edit a Game Night with participants.");
-                return RedirectToAction(nameof(Details), new { id = gameNight.Id });
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    existingGameNight.Address = gameNight.Address;
-                    existingGameNight.MaxPlayers = gameNight.MaxPlayers;
-                    existingGameNight.DateAndTime = gameNight.DateAndTime;
-
-                    // Update de dieetopties
-                    existingGameNight.ProvidesVegetarianOptions = gameNight.ProvidesVegetarianOptions;
-                    existingGameNight.ProvidesLactoseFreeOptions = gameNight.ProvidesLactoseFreeOptions;
-                    existingGameNight.ProvidesNutsFreeOptions = gameNight.ProvidesNutsFreeOptions;
-                    existingGameNight.ProvidesAlcoholFreeOptions = gameNight.ProvidesAlcoholFreeOptions;
-
-                    _context.Update(existingGameNight);
-                    await _context.SaveChangesAsync();
-                    _logger.LogInformation($"GameNight with id {gameNight.Id} successfully updated");
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!GameNightExists(gameNight.Id))
-                    {
-                        _logger.LogWarning($"GameNight with id {gameNight.Id} not found during update");
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            else
-            {
-                _logger.LogWarning($"ModelState is invalid during edit: {string.Join(", ", ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)))}");
-            }
-
-            return View(gameNight);
+            return RedirectToAction(nameof(Index));
         }
 
 

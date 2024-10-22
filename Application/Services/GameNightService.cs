@@ -1,6 +1,7 @@
 ﻿using BordspelAvond.Application.Interfaces;
 using BordspelAvond.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -139,7 +140,52 @@ namespace BordspelAvond.Application.Services
 
             return participatedGames;
         }
+        public async Task<(bool Success, string ErrorMessage, GameNight GameNight)> EditGameNightAsync(int id, GameNight gameNight, string userId)
+        {
+            var existingGameNight = await _gameNightRepository.GetByIdWithParticipantsAsync(id);
+            if (existingGameNight == null)
+            {
+                return (false, "GameNight not found", null);
+            }
 
+            if (existingGameNight.OrganizerId != userId)
+            {
+                return (false, "User not authorized", null);
+            }
+
+            if (existingGameNight.Participants.Any())
+            {
+                return (false, "Cannot edit a Game Night with participants", existingGameNight);
+            }
+
+            existingGameNight.Address = gameNight.Address;
+            existingGameNight.MaxPlayers = gameNight.MaxPlayers;
+            existingGameNight.DateAndTime = gameNight.DateAndTime;
+            existingGameNight.ProvidesVegetarianOptions = gameNight.ProvidesVegetarianOptions;
+            existingGameNight.ProvidesLactoseFreeOptions = gameNight.ProvidesLactoseFreeOptions;
+            existingGameNight.ProvidesNutsFreeOptions = gameNight.ProvidesNutsFreeOptions;
+            existingGameNight.ProvidesAlcoholFreeOptions = gameNight.ProvidesAlcoholFreeOptions;
+
+            try
+            {
+                await _gameNightRepository.UpdateAsync(existingGameNight);
+                return (true, null, existingGameNight);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return (false, "An error occurred while updating the game night", existingGameNight);
+            }
+        }
+
+        public async Task<GameNight> GetGameNightForEditAsync(int id, string userId)
+        {
+            var gameNight = await _gameNightRepository.GetByIdWithParticipantsAsync(id);
+            if (gameNight == null || gameNight.OrganizerId != userId)
+            {
+                return null;
+            }
+            return gameNight;
+        }
 
 
 
