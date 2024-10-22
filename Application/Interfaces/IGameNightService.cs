@@ -23,5 +23,6 @@ namespace BordspelAvond.Application.Interfaces
         Task<(bool Success, string ErrorMessage, GameNight GameNight)> GetGameNightForDeleteAsync(int id, string userId);
         Task<(bool Success, string ErrorMessage)> DeleteGameNightAsync(int id, string userId);
         Task<(bool Success, string ErrorMessage)> AddGameToGameNightAsync(int gameNightId, int gameId);
+        Task<bool> GameNightExistsAsync(int id);
     }
 }

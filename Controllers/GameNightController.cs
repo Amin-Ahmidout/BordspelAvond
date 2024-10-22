@@ -235,9 +235,9 @@ namespace BordspelAvond.Controllers
 
 
 
-        private bool GameNightExists(int id)
+        private async Task<bool> GameNightExists(int id)
         {
-            return _context.GameNights.Any(e => e.Id == id);
+            return await _gameNightService.GameNightExistsAsync(id);
         }
     }
 }

@@ -259,6 +259,10 @@ namespace BordspelAvond.Application.Services
 
             return (true, $"{game.Name} added to GameNight!");
         }
+        public async Task<bool> GameNightExistsAsync(int id)
+        {
+            return await _gameNightRepository.GameNightExistsAsync(id);
+        }
 
 
 

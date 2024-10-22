@@ -85,6 +85,11 @@ namespace BordspelAvond.Infrastructure
             return await _context.Games.FindAsync(id);
         }
 
+        public async Task<bool> GameNightExistsAsync(int id)
+        {
+            return await _context.GameNights.AnyAsync(e => e.Id == id);
+        }
+
         public async Task<IDbContextTransaction> BeginTransactionAsync()
         {
             return await _context.Database.BeginTransactionAsync();
