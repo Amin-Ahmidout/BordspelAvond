@@ -186,7 +186,55 @@ namespace BordspelAvond.Application.Services
             }
             return gameNight;
         }
+        public async Task<(bool Success, string ErrorMessage, GameNight GameNight)> GetGameNightForDeleteAsync(int id, string userId)
+        {
+            var gameNight = await _gameNightRepository.GetByIdWithParticipantsAsync(id);
+            if (gameNight == null)
+            {
+                return (false, "GameNight not found", null);
+            }
 
+            if (gameNight.OrganizerId != userId)
+            {
+                return (false, "User not authorized", null);
+            }
+
+            if (gameNight.Participants.Any())
+            {
+                return (false, "Cannot delete a Game Night with participants", gameNight);
+            }
+
+            return (true, null, gameNight);
+        }
+
+        public async Task<(bool Success, string ErrorMessage)> DeleteGameNightAsync(int id, string userId)
+        {
+            var gameNight = await _gameNightRepository.GetByIdWithParticipantsAsync(id);
+            if (gameNight == null)
+            {
+                return (false, "GameNight not found");
+            }
+
+            if (gameNight.OrganizerId != userId)
+            {
+                return (false, "User not authorized to delete this GameNight");
+            }
+
+            if (gameNight.Participants.Any())
+            {
+                return (false, "Cannot delete a Game Night with participants");
+            }
+
+            try
+            {
+                await _gameNightRepository.DeleteAsync(id);
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, "An error occurred while deleting the game night. Please try again.");
+            }
+        }
 
 
 

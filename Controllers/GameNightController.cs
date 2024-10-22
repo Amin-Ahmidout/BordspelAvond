@@ -182,22 +182,17 @@ namespace BordspelAvond.Controllers
         {
             if (id == null)
             {
+                _logger.LogWarning("Delete action called with null id");
                 return NotFound();
             }
 
-            var gameNight = await _context.GameNights
-                .Include(g => g.Participants) 
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var userId = _userManager.GetUserId(User);
+            var (success, errorMessage, gameNight) = await _gameNightService.GetGameNightForDeleteAsync(id.Value, userId);
 
-            if (gameNight == null)
+            if (!success)
             {
-                return NotFound();
-            }
-
-            if (gameNight.Participants.Any())
-            {
-                ModelState.AddModelError(string.Empty, "You cannot delete this Game Night because there are participants.");
-                return View("Details", gameNight); 
+                ModelState.AddModelError(string.Empty, errorMessage);
+                return View("Details", gameNight);
             }
 
             return View(gameNight);
@@ -208,31 +203,15 @@ namespace BordspelAvond.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var gameNight = await _context.GameNights
-                .Include(g => g.Participants)
-                .FirstOrDefaultAsync(g => g.Id == id);
+            var userId = _userManager.GetUserId(User);
+            var (success, errorMessage) = await _gameNightService.DeleteGameNightAsync(id, userId);
 
-            if (gameNight == null)
+            if (!success)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, errorMessage);
+                return RedirectToAction(nameof(Details), new { id });
             }
 
-            var organizerId = _userManager.GetUserId(User);
-
-           
-            if (gameNight.OrganizerId != organizerId)
-            {
-                return Forbid(); 
-            }
-
-            if (gameNight.Participants.Any())
-            {
-                ModelState.AddModelError(string.Empty, "Cannot delete a Game Night with participants.");
-                return RedirectToAction(nameof(Details), new { id = gameNight.Id });
-            }
-
-            _context.GameNights.Remove(gameNight);
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
