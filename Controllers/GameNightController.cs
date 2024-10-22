@@ -51,57 +51,17 @@ namespace BordspelAvond.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var gameNight = await _gameNightService.GetGameNightByIdAsync(id);
+            // Roep de service aan om de businesslogica af te handelen
+            var (success, errorMessage) = await _gameNightService.JoinGameNightAsync(id, userId);
 
-            if (gameNight == null)
+            if (!success)
             {
-                return NotFound();
+                TempData["JoinError"] = errorMessage;
+                return RedirectToAction("Details", new { id });
             }
 
-            // Controleer of het maximaal aantal spelers is bereikt
-            if (gameNight.Participants.Count >= gameNight.MaxPlayers)
-            {
-                TempData["JoinError"] = "This GameNight is full. No more players can join.";
-                return RedirectToAction("Details", new { id = gameNight.Id });
-            }
-
-            var user = await _userManager.FindByIdAsync(userId);
-
-            // Controleer de leeftijdsrestrictie
-            if (gameNight.Is18Plus)
-            {
-                var age = DateTime.Today.Year - user.BirthDate.Year;
-                if (user.BirthDate.Date > DateTime.Today.AddYears(-age)) age--;
-                if (age < 18)
-                {
-                    TempData["JoinError"] = "You must be at least 18 years old to join this event.";
-                    return RedirectToAction("Details", new { id = gameNight.Id });
-                }
-            }
-
-            // Controleer dieetwensen tegen de beschikbare opties op de GameNight
-            if ((user.IsVegetarian && !gameNight.ProvidesVegetarianOptions) ||
-                (user.HasLactoseAllergy && !gameNight.ProvidesLactoseFreeOptions) ||
-                (user.HasNutsAllergy && !gameNight.ProvidesNutsFreeOptions) ||
-                (user.AvoidsAlcohol && !gameNight.ProvidesAlcoholFreeOptions))
-            {
-                TempData["JoinError"] = "The available food and drink options do not meet your dietary requirements.";
-                return RedirectToAction("Details", new { id = gameNight.Id });
-            }
-
-            // Controleer of de gebruiker al deelneemt
-            if (!gameNight.Participants.Any(p => p.UserId == userId))
-            {
-                await _gameNightService.AddParticipantAsync(gameNight.Id, userId);
-            }
-
-            return RedirectToAction("Details", new { id = gameNight.Id });
+            return RedirectToAction("Details", new { id });
         }
-
-
-
-
-
 
         // GET: GameNight/Details/5
         public async Task<IActionResult> Details(int? id)

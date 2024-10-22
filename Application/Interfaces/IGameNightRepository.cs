@@ -1,4 +1,5 @@
 ﻿using BordspelAvond.Models;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace BordspelAvond.Application.Interfaces
 {
@@ -10,5 +11,7 @@ namespace BordspelAvond.Application.Interfaces
         Task AddAsync(GameNight gameNight);
         Task UpdateAsync(GameNight gameNight);
         Task DeleteAsync(int id);
+        Task<GameNight> GetByIdWithParticipantsAsync(int id);
+        Task<IDbContextTransaction> BeginTransactionAsync();
     }
 }

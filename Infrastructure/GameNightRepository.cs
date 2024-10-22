@@ -1,6 +1,7 @@
 ﻿using BordspelAvond.Application.Interfaces;
 using BordspelAvond.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace BordspelAvond.Infrastructure
 {
@@ -11,6 +12,7 @@ namespace BordspelAvond.Infrastructure
         public GameNightRepository(BordspelDbContext context)
         {
             _context = context;
+
         }
 
         public async Task<IEnumerable<GameNight>> GetAllAsync()
@@ -49,5 +51,18 @@ namespace BordspelAvond.Infrastructure
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<GameNight> GetByIdWithParticipantsAsync(int id)
+        {
+            return await _context.GameNights
+                .Include(g => g.Participants)  // Include the participants in the query
+                .FirstOrDefaultAsync(g => g.Id == id);
+        }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _context.Database.BeginTransactionAsync();
+        }
+
     }
 }

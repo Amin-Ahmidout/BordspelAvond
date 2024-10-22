@@ -13,7 +13,8 @@ namespace BordspelAvond.Application.Interfaces
         Task UpdateGameNightAsync(GameNight gameNight);
         Task DeleteGameNightAsync(int id);
 
-        Task AddParticipantAsync(int gameNightId, string userId);
+        Task<(bool Success, string ErrorMessage)> JoinGameNightAsync(int gameNightId, string userId);
         Task<IEnumerable<Game>> GetAvailableGamesAsync();
+     
     }
 }
