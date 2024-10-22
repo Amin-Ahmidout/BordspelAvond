@@ -102,15 +102,20 @@ namespace BordspelAvond.Application.Services
             return (true, null);
         }
 
-
-
-
-
-
-
-        public Task<IEnumerable<Game>> GetAvailableGamesAsync()
+        public async Task<GameNight> GetGameNightDetailsAsync(int id)
         {
-            throw new NotImplementedException();
+            var gameNight = await _gameNightRepository.GetByIdWithDetailsAsync(id);
+            return gameNight;
+        }
+
+
+
+
+
+
+        public async Task<IEnumerable<Game>> GetAvailableGamesAsync()
+        {
+            return await _gameNightRepository.GetAvailableGamesAsync();
         }
     }
 }

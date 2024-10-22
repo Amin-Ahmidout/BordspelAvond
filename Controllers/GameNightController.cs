@@ -72,11 +72,7 @@ namespace BordspelAvond.Controllers
                 return NotFound();
             }
 
-            var gameNight = await _context.GameNights
-                .Include(g => g.Participants)
-                .Include(g => g.GameNightGames) 
-                    .ThenInclude(gng => gng.Game) 
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var gameNight = await _gameNightService.GetGameNightDetailsAsync(id.Value);
 
             if (gameNight == null)
             {
@@ -84,8 +80,7 @@ namespace BordspelAvond.Controllers
                 return NotFound();
             }
 
-            
-            ViewBag.AvailableGames = await _context.Games.ToListAsync();
+            ViewBag.AvailableGames = await _gameNightService.GetAvailableGamesAsync();
 
             _logger.LogInformation($"Displaying details for GameNight with id {id}");
             return View(gameNight);

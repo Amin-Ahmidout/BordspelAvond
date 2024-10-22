@@ -59,6 +59,20 @@ namespace BordspelAvond.Infrastructure
                 .FirstOrDefaultAsync(g => g.Id == id);
         }
 
+        public async Task<GameNight> GetByIdWithDetailsAsync(int id)
+        {
+            return await _context.GameNights
+                .Include(g => g.Participants)
+                .Include(g => g.GameNightGames)
+                    .ThenInclude(gng => gng.Game)
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
+        public async Task<IEnumerable<Game>> GetAvailableGamesAsync()
+        {
+            return await _context.Games.ToListAsync();
+        }
+
         public async Task<IDbContextTransaction> BeginTransactionAsync()
         {
             return await _context.Database.BeginTransactionAsync();

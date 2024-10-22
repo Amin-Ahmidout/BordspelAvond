@@ -12,6 +12,8 @@ namespace BordspelAvond.Application.Interfaces
         Task UpdateAsync(GameNight gameNight);
         Task DeleteAsync(int id);
         Task<GameNight> GetByIdWithParticipantsAsync(int id);
+        Task<IEnumerable<Game>> GetAvailableGamesAsync();
+        Task<GameNight> GetByIdWithDetailsAsync(int id);
         Task<IDbContextTransaction> BeginTransactionAsync();
     }
 }
