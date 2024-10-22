@@ -218,26 +218,15 @@ namespace BordspelAvond.Controllers
         [HttpPost]
         public async Task<IActionResult> AddGameToGameNight(int gameNightId, int gameId)
         {
-            var gameNight = await _context.GameNights
-                .Include(g => g.GameNightGames)
-                .FirstOrDefaultAsync(g => g.Id == gameNightId);
-            var game = await _context.Games.FindAsync(gameId);
+            var (success, message) = await _gameNightService.AddGameToGameNightAsync(gameNightId, gameId);
 
-            if (gameNight == null || game == null)
+            if (!success)
             {
-                return NotFound();
-            }
-
-         
-            if (gameNight.GameNightGames.Any(gng => gng.GameId == gameId))
-            {
-                TempData["GameAddError"] = "Game is already added to this GameNight.";
+                TempData["GameAddError"] = message;
             }
             else
             {
-                gameNight.GameNightGames.Add(new GameNightGame { GameNightId = gameNightId, GameId = gameId });
-                await _context.SaveChangesAsync();
-                TempData["GameAddSuccess"] = $"{game.Name} added to GameNight!";
+                TempData["GameAddSuccess"] = message;
             }
 
             return RedirectToAction("Details", new { id = gameNightId });

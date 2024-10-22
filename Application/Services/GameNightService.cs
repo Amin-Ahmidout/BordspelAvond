@@ -235,6 +235,30 @@ namespace BordspelAvond.Application.Services
                 return (false, "An error occurred while deleting the game night. Please try again.");
             }
         }
+        public async Task<(bool Success, string ErrorMessage)> AddGameToGameNightAsync(int gameNightId, int gameId)
+        {
+            var gameNight = await _gameNightRepository.GetByIdWithDetailsAsync(gameNightId);
+            if (gameNight == null)
+            {
+                return (false, "GameNight not found");
+            }
+
+            var game = await _gameNightRepository.GetGameByIdAsync(gameId);
+            if (game == null)
+            {
+                return (false, "Game not found");
+            }
+
+            if (gameNight.GameNightGames.Any(gng => gng.GameId == gameId))
+            {
+                return (false, "Game is already added to this GameNight.");
+            }
+
+            gameNight.GameNightGames.Add(new GameNightGame { GameNightId = gameNightId, GameId = gameId });
+            await _gameNightRepository.UpdateAsync(gameNight);
+
+            return (true, $"{game.Name} added to GameNight!");
+        }
 
 
 

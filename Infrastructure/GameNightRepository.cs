@@ -80,6 +80,10 @@ namespace BordspelAvond.Infrastructure
                 .Select(p => p.GameNight)
                 .ToListAsync();
         }
+        public async Task<Game> GetGameByIdAsync(int id)
+        {
+            return await _context.Games.FindAsync(id);
+        }
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()
         {
