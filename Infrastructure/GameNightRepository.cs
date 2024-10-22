@@ -72,6 +72,14 @@ namespace BordspelAvond.Infrastructure
         {
             return await _context.Games.ToListAsync();
         }
+        public async Task<IEnumerable<GameNight>> GetParticipatedGamesByUserAsync(string userId)
+        {
+            return await _context.GameNightParticipants
+                .Include(p => p.GameNight)
+                .Where(p => p.UserId == userId)
+                .Select(p => p.GameNight)
+                .ToListAsync();
+        }
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()
         {

@@ -127,7 +127,18 @@ namespace BordspelAvond.Application.Services
                 return (false, "An error occurred while saving the game night. Please try again.");
             }
         }
+        public async Task<IEnumerable<GameNight>> GetParticipatedGameNightsAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ArgumentException("User ID cannot be null or empty.");
+            }
 
+            var participatedGames = await _gameNightRepository.GetParticipatedGamesByUserAsync(userId);
+
+
+            return participatedGames;
+        }
 
 
 

@@ -125,6 +125,7 @@ namespace BordspelAvond.Controllers
         }
 
 
+        // GET: GameNight/MyParticipatedGames
         public async Task<IActionResult> MyParticipatedGames()
         {
             var userId = _userManager.GetUserId(User);
@@ -133,20 +134,7 @@ namespace BordspelAvond.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var participatedGames = await _context.GameNightParticipants
-                .Include(p => p.GameNight)
-                .Where(p => p.UserId == userId)
-                .Select(p => p.GameNight)
-                .ToListAsync();
-
-            if (!participatedGames.Any())
-            {
-                _logger.LogInformation("No participated games found for user {UserId}", userId);
-            }
-            else
-            {
-                _logger.LogInformation("{Count} participated games found for user {UserId}", participatedGames.Count, userId);
-            }
+            var participatedGames = await _gameNightService.GetParticipatedGameNightsAsync(userId);
 
             return View(participatedGames);
         }
