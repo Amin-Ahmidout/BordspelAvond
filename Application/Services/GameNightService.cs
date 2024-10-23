@@ -161,8 +161,19 @@ namespace BordspelAvond.Application.Services
         public async Task<GameNight> GetGameNightDetailsAsync(int id)
         {
             var gameNight = await _gameNightRepository.GetByIdWithDetailsAsync(id);
+
+            if (gameNight != null && gameNight.OrganizerId != null)
+            {
+                var organizer = await _userManager.FindByIdAsync(gameNight.OrganizerId);
+                if (organizer != null)
+                {
+                    gameNight.Organizer = organizer;  // Voeg de organisator toe aan het model
+                }
+            }
+
             return gameNight;
         }
+
 
         public async Task<(bool Success, string ErrorMessage)> CreateGameNightAsync(GameNight gameNight, string userId)
         {
