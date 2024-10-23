@@ -18,5 +18,6 @@ namespace BordspelAvond.Application.Interfaces
         Task<IEnumerable<GameNight>> GetParticipatedGamesByUserAsync(string userId);
         Task<Game> GetGameByIdAsync(int id);
         Task<bool> GameNightExistsAsync(int id);
+    
     }
 }

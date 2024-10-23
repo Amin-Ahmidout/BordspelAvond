@@ -63,6 +63,7 @@ namespace BordspelAvond.Infrastructure
         {
             return await _context.GameNights
                 .Include(g => g.Participants)
+                .Include(g => g.Snacks)
                 .Include(g => g.GameNightGames)
                     .ThenInclude(gng => gng.Game)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -89,6 +90,8 @@ namespace BordspelAvond.Infrastructure
         {
             return await _context.GameNights.AnyAsync(e => e.Id == id);
         }
+        
+
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()
         {

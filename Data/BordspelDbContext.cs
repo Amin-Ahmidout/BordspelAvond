@@ -10,6 +10,7 @@ public class BordspelDbContext : DbContext
     public DbSet<GameNight> GameNights { get; set; }
     public DbSet<GameNightParticipant> GameNightParticipants { get; set; }
     public DbSet<GameNightGame> GameNightGames { get; set; }
+    public DbSet<GameNightSnack> GameNightSnacks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -46,5 +47,10 @@ public class BordspelDbContext : DbContext
         modelBuilder.Entity<Game>()
           .Property(g => g.Type)
           .HasConversion(new EnumToStringConverter<Game.GameType>());
+
+        modelBuilder.Entity<GameNightSnack>()
+        .HasOne(s => s.GameNight)
+        .WithMany(gn => gn.Snacks)
+        .HasForeignKey(s => s.GameNightId);
     }
 }

@@ -43,7 +43,7 @@ namespace BordspelAvond.Controllers
             return View(organizedGames);
         }
 
-        public async Task<IActionResult> Join(int id)
+        public async Task<IActionResult> Join(int id, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree)
         {
             var userId = _userManager.GetUserId(User);
             if (userId == null)
@@ -51,8 +51,8 @@ namespace BordspelAvond.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Roep de service aan om de businesslogica af te handelen
-            var (success, errorMessage) = await _gameNightService.JoinGameNightAsync(id, userId);
+            // Roep de service aan om de businesslogica af te handelen, inclusief snacks
+            var (success, errorMessage) = await _gameNightService.JoinGameNightAsync(id, userId, snackName, isVegetarian, isLactoseFree, isNutFree, isAlcoholFree);
 
             if (!success)
             {
@@ -62,6 +62,30 @@ namespace BordspelAvond.Controllers
 
             return RedirectToAction("Details", new { id });
         }
+
+        // Join met snack verplicht
+        [HttpPost]
+        public async Task<IActionResult> JoinWithSnack(int gameNightId, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Roep de service aan om deelname en snack toe te voegen
+            var (success, errorMessage) = await _gameNightService.JoinGameNightAsync(gameNightId, userId, snackName, isVegetarian, isLactoseFree, isNutFree, isAlcoholFree);
+
+            if (!success)
+            {
+                TempData["JoinError"] = errorMessage;
+                return RedirectToAction("Details", new { id = gameNightId });
+            }
+
+            TempData["JoinSuccess"] = "Successfully joined the GameNight and added your snack!";
+            return RedirectToAction("Details", new { id = gameNightId });
+        }
+
 
         // GET: GameNight/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -96,7 +120,7 @@ namespace BordspelAvond.Controllers
 
         // POST: GameNight/Create
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("Address,MaxPlayers,DateAndTime,Is18Plus,ProvidesVegetarianOptions,ProvidesLactoseFreeOptions,ProvidesNutsFreeOptions,ProvidesAlcoholFreeOptions")] GameNight gameNight)
+        public async Task<IActionResult> Create([Bind("Address,MaxPlayers,DateAndTime,Is18Plus,ProvidesVegetarianOptions,ProvidesLactoseFreeOptions,ProvidesNutsFreeOptions,ProvidesAlcoholFreeOptions,IsSnackRequired")] GameNight gameNight)
         {
             _logger.LogInformation("Create POST action called");
 
@@ -123,6 +147,7 @@ namespace BordspelAvond.Controllers
 
             return View(gameNight);
         }
+
 
 
         // GET: GameNight/MyParticipatedGames
@@ -231,6 +256,25 @@ namespace BordspelAvond.Controllers
 
             return RedirectToAction("Details", new { id = gameNightId });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> AddSnackToGameNight(int gameNightId, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree)
+        {
+            var (success, message) = await _gameNightService.AddSnackToGameNightAsync(gameNightId, snackName, isVegetarian, isLactoseFree, isNutFree, isAlcoholFree);
+
+            if (!success)
+            {
+                TempData["SnackAddError"] = message;
+            }
+            else
+            {
+                TempData["SnackAddSuccess"] = "Snack added!";
+            }
+
+            return RedirectToAction("Details", new { id = gameNightId });
+        }
+
+
 
 
 

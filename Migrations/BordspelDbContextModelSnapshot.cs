@@ -78,6 +78,9 @@ namespace BordspelAvond.Migrations
                     b.Property<bool>("Is18Plus")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsSnackRequired")
+                        .HasColumnType("bit");
+
                     b.Property<int>("MaxPlayers")
                         .HasColumnType("int");
 
@@ -131,6 +134,39 @@ namespace BordspelAvond.Migrations
                     b.ToTable("GameNightParticipants");
                 });
 
+            modelBuilder.Entity("BordspelAvond.Models.GameNightSnack", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GameNightId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsAlcoholFree")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsLactoseFree")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNutFree")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsVegetarian")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SnackName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameNightId");
+
+                    b.ToTable("GameNightSnacks");
+                });
+
             modelBuilder.Entity("BordspelAvond.Models.GameNight", b =>
                 {
                     b.HasOne("BordspelAvond.Models.Game", null)
@@ -168,6 +204,17 @@ namespace BordspelAvond.Migrations
                     b.Navigation("GameNight");
                 });
 
+            modelBuilder.Entity("BordspelAvond.Models.GameNightSnack", b =>
+                {
+                    b.HasOne("BordspelAvond.Models.GameNight", "GameNight")
+                        .WithMany("Snacks")
+                        .HasForeignKey("GameNightId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GameNight");
+                });
+
             modelBuilder.Entity("BordspelAvond.Models.Game", b =>
                 {
                     b.Navigation("GameNights");
@@ -178,6 +225,8 @@ namespace BordspelAvond.Migrations
                     b.Navigation("GameNightGames");
 
                     b.Navigation("Participants");
+
+                    b.Navigation("Snacks");
                 });
 #pragma warning restore 612, 618
         }

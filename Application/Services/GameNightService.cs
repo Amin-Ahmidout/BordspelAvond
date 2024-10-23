@@ -51,6 +51,66 @@ namespace BordspelAvond.Application.Services
             await _gameNightRepository.DeleteAsync(id);
         }
 
+        public async Task<(bool Success, string ErrorMessage)> JoinGameNightAsync(int gameNightId, string userId, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree)
+        {
+            var gameNight = await _gameNightRepository.GetByIdWithParticipantsAsync(gameNightId);
+            if (gameNight == null)
+            {
+                return (false, "GameNight not found.");
+            }
+
+            // Controleer of het maximaal aantal spelers is bereikt
+            if (gameNight.Participants.Count >= gameNight.MaxPlayers)
+            {
+                return (false, "This GameNight is full. No more players can join.");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            // Controleer de leeftijdsrestrictie
+            if (gameNight.Is18Plus)
+            {
+                var age = DateTime.Today.Year - user.BirthDate.Year;
+                if (user.BirthDate.Date > DateTime.Today.AddYears(-age)) age--;
+                if (age < 18)
+                {
+                    return (false, "You must be at least 18 years old to join this event.");
+                }
+            }
+
+            // Voeg deelnemer toe
+            if (!gameNight.Participants.Any(p => p.UserId == userId))
+            {
+                var participant = new GameNightParticipant
+                {
+                    GameNightId = gameNight.Id,
+                    UserId = userId
+                };
+
+                gameNight.Participants.Add(participant);
+            }
+
+            // Voeg snack toe als snacks vereist zijn
+            if (!string.IsNullOrWhiteSpace(snackName))
+            {
+                var snack = new GameNightSnack
+                {
+                    GameNightId = gameNight.Id,
+                    SnackName = snackName,
+                    IsVegetarian = isVegetarian,
+                    IsLactoseFree = isLactoseFree,
+                    IsNutFree = isNutFree,
+                    IsAlcoholFree = isAlcoholFree
+                };
+
+                gameNight.Snacks.Add(snack);
+            }
+
+            await _gameNightRepository.UpdateAsync(gameNight);
+
+            return (true, null);
+        }
+
         public async Task<(bool Success, string ErrorMessage)> JoinGameNightAsync(int gameNightId, string userId)
         {
             var gameNight = await _gameNightRepository.GetByIdWithParticipantsAsync(gameNightId);
@@ -78,16 +138,7 @@ namespace BordspelAvond.Application.Services
                 }
             }
 
-            // Controleer dieetwensen tegen de beschikbare opties op de GameNight
-            if ((user.IsVegetarian && !gameNight.ProvidesVegetarianOptions) ||
-                (user.HasLactoseAllergy && !gameNight.ProvidesLactoseFreeOptions) ||
-                (user.HasNutsAllergy && !gameNight.ProvidesNutsFreeOptions) ||
-                (user.AvoidsAlcohol && !gameNight.ProvidesAlcoholFreeOptions))
-            {
-                return (false, "The available food and drink options do not meet your dietary requirements.");
-            }
-
-            // Controleer of de gebruiker al deelneemt
+            // Voeg deelnemer toe
             if (!gameNight.Participants.Any(p => p.UserId == userId))
             {
                 var participant = new GameNightParticipant
@@ -102,6 +153,10 @@ namespace BordspelAvond.Application.Services
 
             return (true, null);
         }
+
+
+
+
 
         public async Task<GameNight> GetGameNightDetailsAsync(int id)
         {
@@ -259,12 +314,35 @@ namespace BordspelAvond.Application.Services
 
             return (true, $"{game.Name} added to GameNight!");
         }
+
         public async Task<bool> GameNightExistsAsync(int id)
         {
             return await _gameNightRepository.GameNightExistsAsync(id);
         }
 
+        public async Task<(bool Success, string ErrorMessage)> AddSnackToGameNightAsync(int gameNightId, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree)
+        {
+            var gameNight = await _gameNightRepository.GetByIdWithDetailsAsync(gameNightId);
+            if (gameNight == null)
+            {
+                return (false, "GameNight not found.");
+            }
 
+            var snack = new GameNightSnack
+            {
+                GameNightId = gameNightId,
+                SnackName = snackName,
+                IsVegetarian = isVegetarian,
+                IsLactoseFree = isLactoseFree,
+                IsNutFree = isNutFree,
+                IsAlcoholFree = isAlcoholFree
+            };
+
+            gameNight.Snacks.Add(snack);
+            await _gameNightRepository.UpdateAsync(gameNight);
+
+            return (true, null);
+        }
 
         public async Task<IEnumerable<Game>> GetAvailableGamesAsync()
         {

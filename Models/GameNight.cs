@@ -17,8 +17,11 @@ namespace BordspelAvond.Models
         public bool ProvidesLactoseFreeOptions { get; set; }
         public bool ProvidesNutsFreeOptions { get; set; }
         public bool ProvidesAlcoholFreeOptions { get; set; }
+        public bool IsSnackRequired { get; set; }
+
         public List<GameNightGame> GameNightGames { get; set; } = new List<GameNightGame>();
         public ICollection<GameNightParticipant> Participants { get; set; } = new List<GameNightParticipant>();
+        public ICollection<GameNightSnack> Snacks { get; set; } = new List<GameNightSnack>();
     }
 }
 
