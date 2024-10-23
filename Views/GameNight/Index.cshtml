@@ -14,7 +14,7 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.OrganizerId)
+                @Html.DisplayNameFor(model => model.First().Organizer)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Address)
@@ -31,9 +31,9 @@
     <tbody>
 @foreach (var item in Model) {
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.OrganizerId)
-            </td>
+                <td>
+                    @item.Organizer?.UserName
+                </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Address)
             </td>

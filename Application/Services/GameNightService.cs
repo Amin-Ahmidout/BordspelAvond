@@ -23,8 +23,23 @@ namespace BordspelAvond.Application.Services
 
         public async Task<IEnumerable<GameNight>> GetAllGameNightsAsync()
         {
-            return await _gameNightRepository.GetAllAsync();
+            var gameNights = await _gameNightRepository.GetAllAsync();
+
+            foreach (var gameNight in gameNights)
+            {
+                if (gameNight.OrganizerId != null)
+                {
+                    var organizer = await _userManager.FindByIdAsync(gameNight.OrganizerId);
+                    if (organizer != null)
+                    {
+                        gameNight.Organizer = organizer;  
+                    }
+                }
+            }
+
+            return gameNights;
         }
+
 
         public async Task<GameNight> GetGameNightByIdAsync(int id)
         {
