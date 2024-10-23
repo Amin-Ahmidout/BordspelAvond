@@ -128,16 +128,36 @@ namespace BordspelAvond.Controllers
 
             if (ModelState.IsValid)
             {
+                // Haal de organisator op
                 var organizerId = _userManager.GetUserId(User);
-                var (success, errorMessage) = await _gameNightService.CreateGameNightAsync(gameNight, organizerId);
+                var organizer = await _userManager.FindByIdAsync(organizerId);
 
-                if (success)
+                if (organizer != null)
                 {
-                    return RedirectToAction(nameof(Index));
+                    // Controleer of de organisator ouder is dan 18 jaar
+                    var age = DateTime.Today.Year - organizer.BirthDate.Year;
+                    if (organizer.BirthDate.Date > DateTime.Today.AddYears(-age)) age--;
+
+                    if (age < 18)
+                    {
+                        ModelState.AddModelError(string.Empty, "You must be at least 18 years old to organize a GameNight.");
+                        return View(gameNight);
+                    }
+
+                    var (success, errorMessage) = await _gameNightService.CreateGameNightAsync(gameNight, organizerId);
+
+                    if (success)
+                    {
+                        return RedirectToAction(nameof(Index));
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, errorMessage);
+                    }
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, errorMessage);
+                    ModelState.AddModelError(string.Empty, "There was an issue retrieving your account details.");
                 }
             }
             else
@@ -147,6 +167,7 @@ namespace BordspelAvond.Controllers
 
             return View(gameNight);
         }
+
 
 
 
