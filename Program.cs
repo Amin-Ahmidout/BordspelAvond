@@ -3,7 +3,6 @@ using BordspelAvond.Application.Services;
 using BordspelAvond.Data;
 using BordspelAvond.Infrastructure;
 using BordspelAvond.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,11 +22,11 @@ if (builder.Environment.IsDevelopment())
 }
 else
 {
-    // Gebruik de environment variables in Azure voor de productieomgeving
-    bordspelDbConnectionString = Environment.GetEnvironmentVariable("BORDSPELDB_CONNSTR")
+    // Gebruik Configuration.GetConnectionString in plaats van Environment.GetEnvironmentVariable
+    bordspelDbConnectionString = builder.Configuration.GetConnectionString("BORDSPELDB_CONNSTR")
         ?? throw new InvalidOperationException("Connection string 'BORDSPELDB_CONNSTR' not found.");
 
-    authDbConnectionString = Environment.GetEnvironmentVariable("AUTHDB_CONNSTR")
+    authDbConnectionString = builder.Configuration.GetConnectionString("AUTHDB_CONNSTR")
         ?? throw new InvalidOperationException("Connection string 'AUTHDB_CONNSTR' not found.");
 }
 
