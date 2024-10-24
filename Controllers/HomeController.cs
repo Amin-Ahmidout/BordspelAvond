@@ -18,7 +18,7 @@ namespace BordspelAvond.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult GameNights()
         {
             return View();
         }

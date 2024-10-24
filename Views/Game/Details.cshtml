@@ -1,0 +1,51 @@
+﻿@model BordspelAvond.Models.Game
+
+@{
+    ViewData["Title"] = "Game Details";
+}
+
+<h1>@Model.Name</h1>
+
+<div>
+    <h4>Game Information</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Description</dt>
+        <dd class="col-sm-10">@Model.Description</dd>
+
+        <dt class="col-sm-2">Genre</dt>
+        <dd class="col-sm-10">@Enum.GetName(typeof(BordspelAvond.Models.Game.GameGenre), Model.Genre)</dd>
+
+        <dt class="col-sm-2">Type</dt>
+        <dd class="col-sm-10">@Enum.GetName(typeof(BordspelAvond.Models.Game.GameType), Model.Type)</dd>
+
+        <dt class="col-sm-2">Age Requirement</dt>
+        <dd class="col-sm-10">
+            @if (Model.is18Plus)
+            {
+                <span class="badge bg-danger">18+</span>
+            }
+            else
+            {
+                <span class="badge bg-success">All Ages</span>
+            }
+        </dd>
+
+        <dt class="col-sm-2">Photo</dt>
+        <dd class="col-sm-10">
+            @if (!string.IsNullOrEmpty(Model.PhotoUrl))
+            {
+                <img src="@Model.PhotoUrl" alt="@Model.Name" class="img-thumbnail" style="max-width: 300px;" />
+            }
+            else
+            {
+                <p>No image available</p>
+            }
+        </dd>
+    </dl>
+</div>
+
+<div>
+    <button type="button" class="btn btn-secondary" onclick="history.back()">Back to GameNight Details</button>
+</div>
+

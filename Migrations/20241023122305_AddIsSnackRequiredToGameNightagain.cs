@@ -6,41 +6,35 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BordspelAvond.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSetupClean2 : Migration
+    public partial class AddIsSnackRequiredToGameNightagain : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_GameNights_Player_OrganizerId",
-                table: "GameNights");
+                name: "FK_GameNightSnacks_Player_UserId",
+                table: "GameNightSnacks");
 
             migrationBuilder.DropTable(
                 name: "Player");
 
             migrationBuilder.DropIndex(
-                name: "IX_GameNights_OrganizerId",
-                table: "GameNights");
+                name: "IX_GameNightSnacks_UserId",
+                table: "GameNightSnacks");
 
-            migrationBuilder.AlterColumn<string>(
-                name: "OrganizerId",
-                table: "GameNights",
-                type: "nvarchar(max)",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(450)");
+            migrationBuilder.DropColumn(
+                name: "UserId",
+                table: "GameNightSnacks");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "OrganizerId",
-                table: "GameNights",
+            migrationBuilder.AddColumn<string>(
+                name: "UserId",
+                table: "GameNightSnacks",
                 type: "nvarchar(450)",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                nullable: true);
 
             migrationBuilder.CreateTable(
                 name: "Player",
@@ -48,13 +42,17 @@ namespace BordspelAvond.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     AccessFailedCount = table.Column<int>(type: "int", nullable: false),
+                    AvoidsAlcohol = table.Column<bool>(type: "bit", nullable: false),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     City = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    HasLactoseAllergy = table.Column<bool>(type: "bit", nullable: false),
+                    HasNutsAllergy = table.Column<bool>(type: "bit", nullable: false),
                     HouseNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsVegetarian = table.Column<bool>(type: "bit", nullable: false),
                     LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -74,17 +72,16 @@ namespace BordspelAvond.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_GameNights_OrganizerId",
-                table: "GameNights",
-                column: "OrganizerId");
+                name: "IX_GameNightSnacks_UserId",
+                table: "GameNightSnacks",
+                column: "UserId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_GameNights_Player_OrganizerId",
-                table: "GameNights",
-                column: "OrganizerId",
+                name: "FK_GameNightSnacks_Player_UserId",
+                table: "GameNightSnacks",
+                column: "UserId",
                 principalTable: "Player",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                principalColumn: "Id");
         }
     }
 }

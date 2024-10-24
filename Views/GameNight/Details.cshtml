@@ -1,0 +1,261 @@
+﻿﻿@using Microsoft.AspNetCore.Identity
+@model BordspelAvond.Models.GameNight
+@inject UserManager<BordspelAvond.Models.Player> _userManager
+
+@{
+    ViewData["Title"] = "GameNight Details";
+    var currentUserId = _userManager.GetUserId(User);
+    var isOrganizer = Model.OrganizerId == currentUserId;
+}
+
+<h1>GameNight Details</h1>
+
+<div>
+    <h4>GameNight</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Organizer</dt>
+        <dd class="col-sm-10">@Model.Organizer.UserName</dd>
+
+        <dt class="col-sm-2">Address</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Address)</dd>
+
+        <dt class="col-sm-2">Max Players</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.MaxPlayers)</dd>
+
+        <dt class="col-sm-2">Date and Time</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.DateAndTime)</dd>
+
+        <dt class="col-sm-2">Age Requirement</dt>
+        <dd class="col-sm-10">
+            @if (Model.Is18Plus)
+            {
+                <span class="badge bg-danger">18+</span>
+            }
+            else
+            {
+                <span class="badge bg-success">All Ages</span>
+            }
+        </dd>
+
+        <!-- Sectie voor beschikbare dieetopties -->
+        <dt class="col-sm-2">Available Food & Drink Options</dt>
+        <dd class="col-sm-10">
+            <ul>
+                @if (Model.ProvidesVegetarianOptions)
+                {
+                    <li>Vegetarian Options Available</li>
+                }
+                @if (Model.ProvidesLactoseFreeOptions)
+                {
+                    <li>Lactose-Free Options Available</li>
+                }
+                @if (Model.ProvidesNutsFreeOptions)
+                {
+                    <li>Nut-Free Options Available</li>
+                }
+                @if (Model.ProvidesAlcoholFreeOptions)
+                {
+                    <li>Alcohol-Free Options Available</li>
+                }
+            </ul>
+        </dd>
+
+        <!-- Sectie voor snackverplichting -->
+        <dt class="col-sm-2">Snack Requirement</dt>
+        <dd class="col-sm-10">
+            @if (Model.IsSnackRequired)
+            {
+                <span class="badge bg-warning">Snack Required</span>
+            }
+            else
+            {
+                <span class="badge bg-secondary">Snack Optional</span>
+            }
+        </dd>
+    </dl>
+</div>
+   
+
+<div>
+    <div>
+        <button type="button" class="btn btn-secondary" onclick="history.back()">Back to List</button>
+    </div>
+
+    @if (Model.IsSnackRequired)
+    {
+        <!-- Gebruik JoinWithSnack als snacks verplicht zijn -->
+        <form asp-action="JoinWithSnack" method="post">
+            <input type="hidden" name="gameNightId" value="@Model.Id" />
+            <h3>Add Snack to Join</h3>
+
+            <!-- Snack informatie -->
+            <div class="form-group">
+                <label for="snackName">Snack Name (required)</label>
+                <input type="text" class="form-control" id="snackName" name="snackName" required>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="isVegetarian" id="isVegetarian" value="true">
+                <label class="form-check-label" for="isVegetarian">Vegetarian</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="isLactoseFree" id="isLactoseFree" value="true">
+                <label class="form-check-label" for="isLactoseFree">Lactose-Free</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="isNutFree" id="isNutFree" value="true">
+                <label class="form-check-label" for="isNutFree">Nut-Free</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="isAlcoholFree" id="isAlcoholFree" value="true">
+                <label class="form-check-label" for="isAlcoholFree">Alcohol-Free</label>
+            </div>
+
+
+            <button type="submit" class="btn btn-success mt-3">Join GameNight and Add Snack</button>
+        </form>
+    }
+    else
+    {
+        <!-- Gebruik de standaard Join actie als snacks optioneel zijn -->
+        <form asp-action="Join" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-success">Join this GameNight!</button>
+        </form>
+
+    }
+</div>
+
+
+<h3>Participants</h3>
+@if (Model.Participants != null && Model.Participants.Any())
+{
+    <ul>
+        @foreach (var participant in Model.Participants)
+        {
+            var user = await _userManager.FindByIdAsync(participant.UserId);
+            <li>@user?.UserName</li>
+        }
+    </ul>
+}
+else
+{
+    <p>No participants yet.</p>
+}
+
+@if (isOrganizer && !Model.Participants.Any())
+{
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure you want to delete this game night?');">
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="get" onsubmit="return confirm('Are you sure you want to edit this game night?');">
+        <button type="submit" class="btn btn-danger">Edit</button>
+    </form>
+}
+else if (isOrganizer)
+{
+    <p>You cannot delete/edit this Game Night because there are participants.</p>
+}
+
+<h3>Add Game to GameNight</h3>
+<form asp-action="AddGameToGameNight" method="post">
+    <input type="hidden" name="gameNightId" value="@Model.Id" />
+    <select name="gameId" class="form-select">
+        @foreach (var game in ViewBag.AvailableGames)
+        {
+            <option value="@game.Id">@game.Name</option>
+        }
+    </select>
+    <button type="submit" class="btn btn-primary">Add Game</button>
+</form>
+
+<h4>Games in this GameNight</h4>
+<ul>
+    @foreach (var gameNightGame in Model.GameNightGames)
+    {
+        <li>
+            <strong>@gameNightGame.Game.Name</strong>
+            <a asp-controller="Game" asp-action="Details" asp-route-id="@gameNightGame.Game.Id" class="btn btn-info">Details</a>
+        </li>
+    }
+</ul>
+
+@if (Model.IsSnackRequired)
+{
+    <h4>Snacks for this GameNight</h4>
+    <ul>
+        @foreach (var snack in Model.Snacks)
+        {
+            <li>
+                @snack.SnackName
+
+                @if (snack.IsVegetarian)
+                {
+                    <span class="badge bg-success">Vegetarian</span>
+                }
+                @if (snack.IsLactoseFree)
+                {
+                    <span class="badge bg-info">Lactose-Free</span>
+                }
+                @if (snack.IsNutFree)
+                {
+                    <span class="badge bg-warning">Nut-Free</span>
+                }
+                @if (snack.IsAlcoholFree)
+                {
+                    <span class="badge bg-secondary">Alcohol-Free</span>
+                }
+            </li>
+        }
+    </ul>
+
+}
+
+
+
+
+@section Scripts {
+    <script>
+        @if (TempData["JoinError"] != null)
+        {
+            <text>
+                    alert("@TempData["JoinError"]");
+            </text>
+        }
+
+        @if (TempData["JoinSuccess"] != null)
+        {
+            <text>
+                    alert("@TempData["JoinSuccess"]");
+            </text>
+        }
+
+        @if (TempData["GameAddSuccess"] != null)
+        {
+            <text>
+                    alert("@TempData["GameAddSuccess"]");
+            </text>
+        }
+
+        @if (TempData["GameAddError"] != null)
+        {
+            <text>
+                    alert("@TempData["GameAddError"]");
+            </text>
+        }
+
+        @if (TempData["SnackAddError"] != null)
+        {
+            <text>
+                    alert("@TempData["SnackAddError"]");
+            </text>
+        }
+
+        @if (TempData["SnackAddSuccess"] != null)
+        {
+            <text>
+                    alert("@TempData["SnackAddSuccess"]");
+            </text>
+        }
+    </script>
+}

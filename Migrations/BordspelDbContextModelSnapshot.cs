@@ -33,8 +33,9 @@ namespace BordspelAvond.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Genre")
-                        .HasColumnType("int");
+                    b.Property<string>("Genre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -44,8 +45,9 @@ namespace BordspelAvond.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("is18Plus")
                         .HasColumnType("bit");
@@ -70,46 +72,161 @@ namespace BordspelAvond.Migrations
                     b.Property<DateTime>("DateAndTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("GameId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Is18Plus")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSnackRequired")
+                        .HasColumnType("bit");
+
                     b.Property<int>("MaxPlayers")
                         .HasColumnType("int");
 
                     b.Property<string>("OrganizerId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("ProvidesAlcoholFreeOptions")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ProvidesLactoseFreeOptions")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ProvidesNutsFreeOptions")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ProvidesVegetarianOptions")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("GameId");
 
                     b.ToTable("GameNights");
                 });
 
-            modelBuilder.Entity("GameGameNight", b =>
+            modelBuilder.Entity("BordspelAvond.Models.GameNightGame", b =>
                 {
+                    b.Property<int>("GameNightId")
+                        .HasColumnType("int");
+
                     b.Property<int>("GameId")
                         .HasColumnType("int");
+
+                    b.HasKey("GameNightId", "GameId");
+
+                    b.HasIndex("GameId");
+
+                    b.ToTable("GameNightGames");
+                });
+
+            modelBuilder.Entity("BordspelAvond.Models.GameNightParticipant", b =>
+                {
+                    b.Property<int>("GameNightId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("GameNightId", "UserId");
+
+                    b.ToTable("GameNightParticipants");
+                });
+
+            modelBuilder.Entity("BordspelAvond.Models.GameNightSnack", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("GameNightId")
                         .HasColumnType("int");
 
-                    b.HasKey("GameId", "GameNightId");
+                    b.Property<bool>("IsAlcoholFree")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsLactoseFree")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNutFree")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsVegetarian")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SnackName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("GameNightId");
 
-                    b.ToTable("GameGameNight");
+                    b.ToTable("GameNightSnacks");
                 });
 
-            modelBuilder.Entity("GameGameNight", b =>
+            modelBuilder.Entity("BordspelAvond.Models.GameNight", b =>
                 {
                     b.HasOne("BordspelAvond.Models.Game", null)
+                        .WithMany("GameNights")
+                        .HasForeignKey("GameId");
+                });
+
+            modelBuilder.Entity("BordspelAvond.Models.GameNightGame", b =>
+                {
+                    b.HasOne("BordspelAvond.Models.Game", "Game")
                         .WithMany()
                         .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BordspelAvond.Models.GameNight", null)
-                        .WithMany()
+                    b.HasOne("BordspelAvond.Models.GameNight", "GameNight")
+                        .WithMany("GameNightGames")
                         .HasForeignKey("GameNightId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("GameNight");
+                });
+
+            modelBuilder.Entity("BordspelAvond.Models.GameNightParticipant", b =>
+                {
+                    b.HasOne("BordspelAvond.Models.GameNight", "GameNight")
+                        .WithMany("Participants")
+                        .HasForeignKey("GameNightId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GameNight");
+                });
+
+            modelBuilder.Entity("BordspelAvond.Models.GameNightSnack", b =>
+                {
+                    b.HasOne("BordspelAvond.Models.GameNight", "GameNight")
+                        .WithMany("Snacks")
+                        .HasForeignKey("GameNightId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GameNight");
+                });
+
+            modelBuilder.Entity("BordspelAvond.Models.Game", b =>
+                {
+                    b.Navigation("GameNights");
+                });
+
+            modelBuilder.Entity("BordspelAvond.Models.GameNight", b =>
+                {
+                    b.Navigation("GameNightGames");
+
+                    b.Navigation("Participants");
+
+                    b.Navigation("Snacks");
                 });
 #pragma warning restore 612, 618
         }

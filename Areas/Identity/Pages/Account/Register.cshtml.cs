@@ -80,6 +80,22 @@ namespace BordspelAvond.Areas.Identity.Pages.Account
             [Display(Name = "Email")]
             public string Email { get; set; }
 
+            [Required]
+            [Display(Name = "Name")]
+            public string Name { get; set; }
+
+            [Required]
+            public DateTime BirthDate { get; set; }
+
+            public string Gender { get; set; }
+            public string City { get; set; }
+            public string Street { get; set; }
+            public string HouseNumber { get; set; }
+            public bool IsVegetarian { get; set; }
+            public bool HasLactoseAllergy { get; set; }
+            public bool HasNutsAllergy { get; set; }
+            public bool AvoidsAlcohol { get; set; }
+
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -111,9 +127,30 @@ namespace BordspelAvond.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
             if (ModelState.IsValid)
             {
+                var today = DateTime.Today;
+                var age = today.Year - Input.BirthDate.Year;
+                if (Input.BirthDate.Date > today.AddYears(-age)) age--; 
+
+                if (age < 16)
+                {
+                    ModelState.AddModelError(string.Empty, "You must be at least 16 years old to register.");
+                    return Page(); 
+                }
+
                 var user = CreateUser();
+                user.Name = Input.Name;
+                user.Gender = Input.Gender;
+                user.Street = Input.Street;
+                user.HouseNumber = Input.HouseNumber;
+                user.City = Input.City;
+                user.BirthDate = Input.BirthDate;
+                user.IsVegetarian = Input.IsVegetarian;
+                user.HasLactoseAllergy = Input.HasLactoseAllergy;
+                user.HasNutsAllergy = Input.HasNutsAllergy;
+                user.AvoidsAlcohol = Input.AvoidsAlcohol;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -150,10 +187,9 @@ namespace BordspelAvond.Areas.Identity.Pages.Account
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-
-            // If we got this far, something failed, redisplay form
             return Page();
         }
+
 
         private Player CreateUser()
         {

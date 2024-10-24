@@ -24,8 +24,8 @@
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
     <Folder Include="Domain\" />
-    <Folder Include="Infrastructure\" />
     <Folder Include="API\" />
+    <Folder Include="Views\Snacks\" />
     <Folder Include="WebApp\" />
   </ItemGroup>
 

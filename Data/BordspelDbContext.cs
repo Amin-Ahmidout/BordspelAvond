@@ -1,5 +1,6 @@
 ﻿using BordspelAvond.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 public class BordspelDbContext : DbContext
 {
@@ -7,32 +8,49 @@ public class BordspelDbContext : DbContext
 
     public DbSet<Game> Games { get; set; }
     public DbSet<GameNight> GameNights { get; set; }
-  
-
+    public DbSet<GameNightParticipant> GameNightParticipants { get; set; }
+    public DbSet<GameNightGame> GameNightGames { get; set; }
+    public DbSet<GameNightSnack> GameNightSnacks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // Configureren van de many-to-many relatie tussen Game en GameNight zonder cascade delete
-        modelBuilder.Entity<GameNight>()
-            .HasMany(g => g.PlayedGames)
-            .WithMany(g => g.GameNights)
-            .UsingEntity<Dictionary<string, object>>(
-                "GameGameNight",
-                j => j
-                    .HasOne<Game>()
-                    .WithMany()
-                    .HasForeignKey("GameId")
-                    .OnDelete(DeleteBehavior.Restrict),
-                j => j
-                    .HasOne<GameNight>()
-                    .WithMany()
-                    .HasForeignKey("GameNightId")
-                    .OnDelete(DeleteBehavior.Restrict)
-            );
+        // Configuratie voor de tussenklasse GameNightGame om GameNight en Game te verbinden
+        modelBuilder.Entity<GameNightGame>()
+            .HasKey(gng => new { gng.GameNightId, gng.GameId });
 
-      
-       
+        modelBuilder.Entity<GameNightGame>()
+            .HasOne(gng => gng.GameNight)
+            .WithMany(gn => gn.GameNightGames)
+            .HasForeignKey(gng => gng.GameNightId);
+
+        modelBuilder.Entity<GameNightGame>()
+            .HasOne(gng => gng.Game)
+            .WithMany()
+            .HasForeignKey(gng => gng.GameId);
+
+        // Configuratie voor GameNightParticipant (deelnemers van een GameNight)
+        modelBuilder.Entity<GameNightParticipant>()
+            .HasKey(gp => new { gp.GameNightId, gp.UserId });
+
+        modelBuilder.Entity<GameNightParticipant>()
+            .HasOne(gp => gp.GameNight)
+            .WithMany(g => g.Participants)
+            .HasForeignKey(gp => gp.GameNightId);
+
+        // ValueConverter voor GameGenre om de enum als string op te slaan
+        modelBuilder.Entity<Game>()
+            .Property(g => g.Genre)
+            .HasConversion(new EnumToStringConverter<Game.GameGenre>());
+
+        modelBuilder.Entity<Game>()
+          .Property(g => g.Type)
+          .HasConversion(new EnumToStringConverter<Game.GameType>());
+
+        modelBuilder.Entity<GameNightSnack>()
+        .HasOne(s => s.GameNight)
+        .WithMany(gn => gn.Snacks)
+        .HasForeignKey(s => s.GameNightId);
     }
 }
