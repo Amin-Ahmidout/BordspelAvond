@@ -336,10 +336,17 @@ namespace BordspelAvond.Application.Services
             }
 
             gameNight.GameNightGames.Add(new GameNightGame { GameNightId = gameNightId, GameId = gameId });
+
+            if (game.is18Plus && !gameNight.Is18Plus)
+            {
+                gameNight.Is18Plus = true;
+            }
+
             await _gameNightRepository.UpdateAsync(gameNight);
 
             return (true, $"{game.Name} added to GameNight!");
         }
+
 
         public async Task<bool> GameNightExistsAsync(int id)
         {
