@@ -43,7 +43,7 @@ namespace BordspelAvond.Controllers
             return View(organizedGames);
         }
 
-        public async Task<IActionResult> Join(int id, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree)
+        public async Task<IActionResult> Join(int id)
         {
             var userId = _userManager.GetUserId(User);
             if (userId == null)
@@ -52,16 +52,17 @@ namespace BordspelAvond.Controllers
             }
 
             // Roep de service aan om de businesslogica af te handelen, inclusief snacks
-            var (success, errorMessage) = await _gameNightService.JoinGameNightAsync(id, userId, snackName, isVegetarian, isLactoseFree, isNutFree, isAlcoholFree);
+            var (success, errorMessage) = await _gameNightService.JoinGameNightAsync(id, userId);
 
             if (!success)
             {
                 TempData["JoinError"] = errorMessage;
-                return RedirectToAction("Details", new { id });
+                return RedirectToAction("Details", new { id});
             }
 
             return RedirectToAction("Details", new { id });
         }
+
 
         // Join met snack verplicht
         [HttpPost]
@@ -109,6 +110,7 @@ namespace BordspelAvond.Controllers
             _logger.LogInformation($"Displaying details for GameNight with id {id}");
             return View(gameNight);
         }
+
 
 
         // GET: GameNight/Create

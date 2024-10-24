@@ -153,7 +153,16 @@ namespace BordspelAvond.Application.Services
                 }
             }
 
-            // Voeg deelnemer toe
+            // Controleer dieetwensen tegen de beschikbare opties op de GameNight
+            if ((user.IsVegetarian && !gameNight.ProvidesVegetarianOptions) ||
+                (user.HasLactoseAllergy && !gameNight.ProvidesLactoseFreeOptions) ||
+                (user.HasNutsAllergy && !gameNight.ProvidesNutsFreeOptions) ||
+                (user.AvoidsAlcohol && !gameNight.ProvidesAlcoholFreeOptions))
+            {
+                return (false, "The available food and drink options do not meet your dietary requirements.");
+            }
+
+            // Controleer of de gebruiker al deelneemt
             if (!gameNight.Participants.Any(p => p.UserId == userId))
             {
                 var participant = new GameNightParticipant
@@ -313,9 +322,10 @@ namespace BordspelAvond.Application.Services
             }
             catch (Exception ex)
             {
-                return (false, "An error occurred while deleting the game night. Please try again.");
+                return (false, "An error occurred while deleting the GameNight. Please try again.");
             }
         }
+
         public async Task<(bool Success, string ErrorMessage)> AddGameToGameNightAsync(int gameNightId, int gameId)
         {
             var gameNight = await _gameNightRepository.GetByIdWithDetailsAsync(gameNightId);

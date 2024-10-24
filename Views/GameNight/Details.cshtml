@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿﻿@using Microsoft.AspNetCore.Identity
 @model BordspelAvond.Models.GameNight
 @inject UserManager<BordspelAvond.Models.Player> _userManager
 
@@ -75,9 +75,12 @@
         </dd>
     </dl>
 </div>
+   
 
 <div>
-    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    <div>
+        <button type="button" class="btn btn-secondary" onclick="history.back()">Back to List</button>
+    </div>
 
     @if (Model.IsSnackRequired)
     {
@@ -116,11 +119,13 @@
     {
         <!-- Gebruik de standaard Join actie als snacks optioneel zijn -->
         <form asp-action="Join" method="post">
-            <input type="hidden" name="gameNightId" value="@Model.Id" />
-            <button type="submit" class="btn btn-success">Join this GameNight</button>
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-success">Join this GameNight!</button>
         </form>
+
     }
 </div>
+
 
 <h3>Participants</h3>
 @if (Model.Participants != null && Model.Participants.Any())
@@ -214,42 +219,42 @@ else if (isOrganizer)
         @if (TempData["JoinError"] != null)
         {
             <text>
-                        alert("@TempData["JoinError"]");
+                    alert("@TempData["JoinError"]");
             </text>
         }
 
         @if (TempData["JoinSuccess"] != null)
         {
             <text>
-                        alert("@TempData["JoinSuccess"]");
+                    alert("@TempData["JoinSuccess"]");
             </text>
         }
 
         @if (TempData["GameAddSuccess"] != null)
         {
             <text>
-                            alert("@TempData["GameAddSuccess"]");
+                    alert("@TempData["GameAddSuccess"]");
             </text>
         }
 
         @if (TempData["GameAddError"] != null)
         {
             <text>
-                            alert("@TempData["GameAddError"]");
+                    alert("@TempData["GameAddError"]");
             </text>
         }
 
         @if (TempData["SnackAddError"] != null)
         {
             <text>
-                            alert("@TempData["SnackAddError"]");
+                    alert("@TempData["SnackAddError"]");
             </text>
         }
 
         @if (TempData["SnackAddSuccess"] != null)
         {
             <text>
-                            alert("@TempData["SnackAddSuccess"]");
+                    alert("@TempData["SnackAddSuccess"]");
             </text>
         }
     </script>
