@@ -9,10 +9,6 @@
         public bool IsLactoseFree { get; set; }
         public bool IsNutFree { get; set; }
         public bool IsAlcoholFree { get; set; }
-
-        //public string? UserId { get; set; } // Relatie met User  
-        //public Player? User { get; set; } // Relatie met User
-
         public GameNight? GameNight { get; set; } // Relatie met GameNight
     }
 }
