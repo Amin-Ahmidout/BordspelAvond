@@ -3,6 +3,7 @@ using BordspelAvond.Application.Services;
 using BordspelAvond.Data;
 using BordspelAvond.Infrastructure;
 using BordspelAvond.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,6 +50,26 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
+// Automatische migraties toepassen bij opstarten
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        // Zorg ervoor dat de contexten gemigreerd worden
+        var bordspelContext = services.GetRequiredService<BordspelDbContext>();
+        bordspelContext.Database.Migrate();
+
+        var authContext = services.GetRequiredService<AuthDbContext>();
+        authContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -62,10 +83,8 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
-app.UseAuthentication(); // Zorg ervoor dat Authentication is ingeschakeld
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
