@@ -324,5 +324,30 @@ namespace BordspelAvond.Tests
             _mockRepository.Verify(repo => repo.UpdateAsync(gameNight), Times.Once);
         }
 
+        //----------Foutieve AddSnackToGameNightAsync tests------------------->
+        [Fact]
+        public async Task AddSnackToGameNightAsync_GameNightNotFound_ReturnsError()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var snackName = "Chips";
+            var isVegetarian = true;
+            var isLactoseFree = true;
+            var isNutFree = true;
+            var isAlcoholFree = true;
+
+            _mockRepository.Setup(repo => repo.GetByIdWithDetailsAsync(gameNightId))
+                .ReturnsAsync((GameNight)null!); // Simuleer dat de GameNight niet gevonden wordt
+
+            // Act
+            var (success, errorMessage) = await _service.AddSnackToGameNightAsync(gameNightId, snackName, isVegetarian, isLactoseFree, isNutFree, isAlcoholFree);
+
+            // Assert
+            Assert.False(success);
+            Assert.Equal("GameNight not found.", errorMessage);
+            _mockRepository.Verify(repo => repo.UpdateAsync(It.IsAny<GameNight>()), Times.Never);
+        }
+
+
     }
 }
