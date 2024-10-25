@@ -288,6 +288,41 @@ namespace BordspelAvond.Tests
             _mockRepository.Verify(repo => repo.DeleteAsync(It.IsAny<int>()), Times.Never);
         }
 
+        //----------Test voor een succesvolle AddSnackToGameNightAsync------------------->
+        [Fact]
+        public async Task AddSnackToGameNightAsync_ValidRequest_ReturnsSuccess()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var gameNight = new GameNight
+            {
+                Id = gameNightId,
+                Snacks = new List<GameNightSnack>()
+            };
+
+            var snackName = "Chips";
+            var isVegetarian = true;
+            var isLactoseFree = true;
+            var isNutFree = true;
+            var isAlcoholFree = true;
+
+            _mockRepository.Setup(repo => repo.GetByIdWithDetailsAsync(gameNightId))
+                .ReturnsAsync(gameNight);
+
+            // Act
+            var (success, errorMessage) = await _service.AddSnackToGameNightAsync(gameNightId, snackName, isVegetarian, isLactoseFree, isNutFree, isAlcoholFree);
+
+            // Assert
+            Assert.True(success);
+            Assert.Null(errorMessage);
+            Assert.Single(gameNight.Snacks); // Controleer of er één snack is toegevoegd
+            Assert.Equal(snackName, gameNight.Snacks.First().SnackName);
+            Assert.True(gameNight.Snacks.First().IsVegetarian);
+            Assert.True(gameNight.Snacks.First().IsLactoseFree);
+            Assert.True(gameNight.Snacks.First().IsNutFree);
+            Assert.True(gameNight.Snacks.First().IsAlcoholFree);
+            _mockRepository.Verify(repo => repo.UpdateAsync(gameNight), Times.Once);
+        }
 
     }
 }
