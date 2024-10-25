@@ -18,7 +18,7 @@ namespace BordspelAvond.Tests
         {
             // Mock setup voor de repository
             _mockRepository = new Mock<IGameNightRepository>();
-            _mockUserManager = new Mock<UserManager<Player>>(Mock.Of<IUserStore<Player>>(), null, null, null, null, null, null, null, null);
+            _mockUserManager = new Mock<UserManager<Player>>(Mock.Of<IUserStore<Player>>(), null!, null!, null!, null!, null!, null!, null!, null!);
 
             // Instantieer de service met de mock
             _service = new GameNightService(_mockRepository.Object, _mockUserManager.Object);
