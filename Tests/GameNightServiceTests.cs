@@ -454,6 +454,33 @@ namespace BordspelAvond.Tests
             _mockRepository.Verify(repo => repo.UpdateAsync(gameNight), Times.Never);
         }
 
+        // Test voor een succesvolle GetAllGameNightsAsync()
+        [Fact]
+        public async Task GetAllGameNightsAsync_ReturnsGameNights_WithOrganizerDetails()
+        {
+            // Arrange
+            var gameNights = new List<GameNight>
+            {
+                new GameNight { Id = 1, OrganizerId = "user123" },
+                new GameNight { Id = 2, OrganizerId = "user456" }
+            };
+
+            var organizer1 = new Player { Id = "user123", UserName = "Organizer1" };
+            var organizer2 = new Player { Id = "user456", UserName = "Organizer2" };
+
+            _mockRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(gameNights);
+            _mockUserManager.Setup(um => um.FindByIdAsync("user123")).ReturnsAsync(organizer1);
+            _mockUserManager.Setup(um => um.FindByIdAsync("user456")).ReturnsAsync(organizer2);
+
+            // Act
+            var result = await _service.GetAllGameNightsAsync();
+
+            // Assert
+            Assert.Equal(2, result.Count());
+            Assert.Equal("Organizer1", result.First().Organizer.UserName);
+            Assert.Equal("Organizer2", result.Last().Organizer.UserName);
+        }
+
 
     }
 }
