@@ -348,6 +348,36 @@ namespace BordspelAvond.Tests
             _mockRepository.Verify(repo => repo.UpdateAsync(It.IsAny<GameNight>()), Times.Never);
         }
 
+        //----------Test voor een succesvolle AddGameToGameNightAsync------------------->
+        [Fact]
+        public async Task AddGameToGameNightAsync_ValidGameAndGameNight_ReturnsSuccess()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var gameId = 100;
+            var game = new Game { Id = gameId, Name = "Catan", is18Plus = false };
+            var gameNight = new GameNight
+            {
+                Id = gameNightId,
+                GameNightGames = new List<GameNightGame>()
+            };
+
+            _mockRepository.Setup(repo => repo.GetByIdWithDetailsAsync(gameNightId))
+                .ReturnsAsync(gameNight);
+            _mockRepository.Setup(repo => repo.GetGameByIdAsync(gameId))
+                .ReturnsAsync(game);
+
+            // Act
+            var (success, message) = await _service.AddGameToGameNightAsync(gameNightId, gameId);
+
+            // Assert
+            Assert.True(success);
+            Assert.Equal($"{game.Name} added to GameNight!", message);
+            Assert.Single(gameNight.GameNightGames);
+            Assert.Equal(gameId, gameNight.GameNightGames.First().GameId);
+            _mockRepository.Verify(repo => repo.UpdateAsync(gameNight), Times.Once);
+        }
+
 
     }
 }
