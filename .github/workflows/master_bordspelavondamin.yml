@@ -22,7 +22,7 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: Run tests
-        run: dotnet test --no-build --verbosity normal # Voert tests uit met normale details.
+        run: dotnet test ./BordspelAvond.Tests/BordspelAvond.csproj --no-build --verbosity normal
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ./myapp
