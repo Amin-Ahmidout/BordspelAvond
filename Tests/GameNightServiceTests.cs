@@ -148,5 +148,69 @@ namespace BordspelAvond.Tests
             _mockRepository.Verify(repo => repo.UpdateAsync(It.IsAny<GameNight>()), Times.Once);
         }
 
+        //----------FOutieve edit tests------------------->
+        [Fact]
+        public async Task EditGameNightAsync_UserNotAuthorized_ReturnsError()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var userId = "user456"; // Niet de organisator
+            var gameNight = new GameNight
+            {
+                Id = gameNightId,
+                OrganizerId = "user123", // Andere gebruiker is de organisator
+                Participants = new List<GameNightParticipant>() // Geen deelnemers
+            };
+            var updatedGameNight = new GameNight
+            {
+                Id = gameNightId,
+                Address = "New Address",
+                MaxPlayers = 10
+            };
+
+            _mockRepository.Setup(repo => repo.GetByIdWithParticipantsAsync(gameNightId))
+                .ReturnsAsync(gameNight);
+
+            // Act
+            var (success, errorMessage, updatedResult) = await _service.EditGameNightAsync(gameNightId, updatedGameNight, userId);
+
+            // Assert
+            Assert.False(success);
+            Assert.Equal("User not authorized", errorMessage);
+            _mockRepository.Verify(repo => repo.UpdateAsync(It.IsAny<GameNight>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task EditGameNightAsync_GameNightHasParticipants_ReturnsError()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var userId = "user123";
+            var gameNight = new GameNight
+            {
+                Id = gameNightId,
+                OrganizerId = userId,
+                Participants = new List<GameNightParticipant> { new GameNightParticipant { GameNightId = 1, UserId = "participant1" } } // Heeft deelnemers
+            };
+            var updatedGameNight = new GameNight
+            {
+                Id = gameNightId,
+                Address = "New Address",
+                MaxPlayers = 10
+            };
+
+            _mockRepository.Setup(repo => repo.GetByIdWithParticipantsAsync(gameNightId))
+                .ReturnsAsync(gameNight);
+
+            // Act
+            var (success, errorMessage, updatedResult) = await _service.EditGameNightAsync(gameNightId, updatedGameNight, userId);
+
+            // Assert
+            Assert.False(success);
+            Assert.Equal("Cannot edit a Game Night with participants", errorMessage);
+            _mockRepository.Verify(repo => repo.UpdateAsync(It.IsAny<GameNight>()), Times.Never);
+        }
+
+
     }
 }
