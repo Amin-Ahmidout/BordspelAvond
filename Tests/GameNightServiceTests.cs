@@ -553,5 +553,43 @@ namespace BordspelAvond.Tests
             Assert.Null(result);
             _mockRepository.Verify(repo => repo.GetByIdAsync(gameNightId), Times.Once);
         }
+
+        // Test voor het ophalen van GameNight details zonder een organizer
+        [Fact]
+        public async Task GetGameNightDetailsAsync_ValidIdWithoutOrganizer_ReturnsGameNightWithoutOrganizer()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var expectedGameNight = new GameNight { Id = gameNightId, OrganizerId = null };
+
+            _mockRepository.Setup(repo => repo.GetByIdWithDetailsAsync(gameNightId)).ReturnsAsync(expectedGameNight);
+
+            // Act
+            var result = await _service.GetGameNightDetailsAsync(gameNightId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedGameNight.Id, result.Id);
+            Assert.Null(result.Organizer);
+            _mockRepository.Verify(repo => repo.GetByIdWithDetailsAsync(gameNightId), Times.Once);
+            _mockUserManager.Verify(manager => manager.FindByIdAsync(It.IsAny<string>()), Times.Never);
+        }
+
+        // Test voor een niet-bestaande GameNight ID
+        [Fact]
+        public async Task GetGameNightDetailsAsync_InvalidId_ReturnsNull()
+        {
+            // Arrange
+            var gameNightId = 999; // Niet-bestaande ID
+            _mockRepository.Setup(repo => repo.GetByIdWithDetailsAsync(gameNightId)).ReturnsAsync((GameNight)null!);
+
+            // Act
+            var result = await _service.GetGameNightDetailsAsync(gameNightId);
+
+            // Assert
+            Assert.Null(result);
+            _mockRepository.Verify(repo => repo.GetByIdWithDetailsAsync(gameNightId), Times.Once);
+            _mockUserManager.Verify(manager => manager.FindByIdAsync(It.IsAny<string>()), Times.Never);
+        }
     }
 }
