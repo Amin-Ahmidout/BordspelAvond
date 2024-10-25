@@ -237,6 +237,56 @@ namespace BordspelAvond.Tests
             _mockRepository.Verify(repo => repo.DeleteAsync(gameNightId), Times.Once);
         }
 
+        //----------Foutieve delete tests------------------->
+        [Fact]
+        public async Task DeleteGameNightAsync_UserNotAuthorized_ReturnsError()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var userId = "user456"; // Niet de organisator
+            var gameNight = new GameNight
+            {
+                Id = gameNightId,
+                OrganizerId = "user123", // Andere gebruiker is de organisator
+                Participants = new List<GameNightParticipant>() // Geen deelnemers
+            };
+
+            _mockRepository.Setup(repo => repo.GetByIdWithParticipantsAsync(gameNightId))
+                .ReturnsAsync(gameNight);
+
+            // Act
+            var (success, errorMessage) = await _service.DeleteGameNightAsync(gameNightId, userId);
+
+            // Assert
+            Assert.False(success);
+            Assert.Equal("User not authorized to delete this GameNight", errorMessage);
+            _mockRepository.Verify(repo => repo.DeleteAsync(It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteGameNightAsync_GameNightHasParticipants_ReturnsError()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var userId = "user123";
+            var gameNight = new GameNight
+            {
+                Id = gameNightId,
+                OrganizerId = userId,
+                Participants = new List<GameNightParticipant> { new GameNightParticipant { GameNightId = 1, UserId = "participant1" } } // Heeft deelnemers
+            };
+
+            _mockRepository.Setup(repo => repo.GetByIdWithParticipantsAsync(gameNightId))
+                .ReturnsAsync(gameNight);
+
+            // Act
+            var (success, errorMessage) = await _service.DeleteGameNightAsync(gameNightId, userId);
+
+            // Assert
+            Assert.False(success);
+            Assert.Equal("Cannot delete a Game Night with participants", errorMessage);
+            _mockRepository.Verify(repo => repo.DeleteAsync(It.IsAny<int>()), Times.Never);
+        }
 
 
     }
