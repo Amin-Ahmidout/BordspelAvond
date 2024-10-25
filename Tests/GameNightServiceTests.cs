@@ -515,5 +515,43 @@ namespace BordspelAvond.Tests
             Assert.Single(result);
             Assert.Null(result.First().Organizer); // Organizer is null
         }
+
+        // Test voor een geldige GameNightId
+        [Fact]
+        public async Task GetGameNightByIdAsync_ValidId_ReturnsGameNight()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var expectedGameNight = new GameNight { Id = gameNightId, Address = "123 Board Game St" };
+
+            _mockRepository.Setup(repo => repo.GetByIdAsync(gameNightId))
+                           .ReturnsAsync(expectedGameNight);
+
+            // Act
+            var result = await _service.GetGameNightByIdAsync(gameNightId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedGameNight.Id, result.Id);
+            Assert.Equal(expectedGameNight.Address, result.Address);
+            _mockRepository.Verify(repo => repo.GetByIdAsync(gameNightId), Times.Once);
+        }
+
+        // Test voor een niet-bestaande GameNightId
+        [Fact]
+        public async Task GetGameNightByIdAsync_InvalidId_ReturnsNull()
+        {
+            // Arrange
+            var gameNightId = 999; // Niet-bestaande ID
+            _mockRepository.Setup(repo => repo.GetByIdAsync(gameNightId))
+                           .ReturnsAsync((GameNight)null!);
+
+            // Act
+            var result = await _service.GetGameNightByIdAsync(gameNightId);
+
+            // Assert
+            Assert.Null(result);
+            _mockRepository.Verify(repo => repo.GetByIdAsync(gameNightId), Times.Once);
+        }
     }
 }
