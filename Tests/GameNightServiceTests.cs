@@ -481,6 +481,39 @@ namespace BordspelAvond.Tests
             Assert.Equal("Organizer2", result.Last().Organizer.UserName);
         }
 
+        // Test voor het scenario waarbij er geen game nights zijn
+        [Fact]
+        public async Task GetAllGameNightsAsync_ReturnsEmptyList_WhenNoGameNightsExist()
+        {
+            // Arrange
+            _mockRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(new List<GameNight>());
 
+            // Act
+            var result = await _service.GetAllGameNightsAsync();
+
+            // Assert
+            Assert.Empty(result);
+        }
+
+        // Test voor het scenario waarbij de organizer niet wordt gevonden
+        [Fact]
+        public async Task GetAllGameNightsAsync_OrganizerNotFound_ReturnsGameNightWithNullOrganizer()
+        {
+            // Arrange
+            var gameNights = new List<GameNight>
+            {
+                new GameNight { Id = 1, OrganizerId = "nonexistent" }
+            };
+
+            _mockRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(gameNights);
+            _mockUserManager.Setup(um => um.FindByIdAsync("nonexistent")).ReturnsAsync((Player)null!); // Organizer wordt niet gevonden
+
+            // Act
+            var result = await _service.GetAllGameNightsAsync();
+
+            // Assert
+            Assert.Single(result);
+            Assert.Null(result.First().Organizer); // Organizer is null
+        }
     }
 }
