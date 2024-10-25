@@ -591,5 +591,71 @@ namespace BordspelAvond.Tests
             _mockRepository.Verify(repo => repo.GetByIdWithDetailsAsync(gameNightId), Times.Once);
             _mockUserManager.Verify(manager => manager.FindByIdAsync(It.IsAny<string>()), Times.Never);
         }
+
+        // Test voor het ophalen van GameNights waaraan de gebruiker heeft deelgenomen
+        [Fact]
+        public async Task GetParticipatedGameNightsAsync_ValidUserId_ReturnsParticipatedGameNights()
+        {
+            // Arrange
+            var userId = "user123";
+            var participatedGameNights = new List<GameNight>
+            {
+                new GameNight { Id = 1, Address = "Address 1" },
+                new GameNight { Id = 2, Address = "Address 2" }
+            };
+
+            _mockRepository.Setup(repo => repo.GetParticipatedGamesByUserAsync(userId)).ReturnsAsync(participatedGameNights);
+
+            // Act
+            var result = await _service.GetParticipatedGameNightsAsync(userId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(participatedGameNights.Count, result.Count());
+            Assert.Equal(participatedGameNights[0].Address, result.First().Address);
+            _mockRepository.Verify(repo => repo.GetParticipatedGamesByUserAsync(userId), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetParticipatedGameNightsAsync_EmptyUserId_ThrowsArgumentException()
+        {
+            // Arrange
+            var emptyUserId = "";
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.GetParticipatedGameNightsAsync(emptyUserId));
+            _mockRepository.Verify(repo => repo.GetParticipatedGamesByUserAsync(It.IsAny<string>()), Times.Never);
+        }
+
+        // Test voor het controleren of een GameNight bestaat
+        [Fact]
+        public async Task GameNightExistsAsync_GameNightExists_ReturnsTrue()
+        {
+            // Arrange
+            var gameNightId = 1;
+            _mockRepository.Setup(repo => repo.GameNightExistsAsync(gameNightId)).ReturnsAsync(true);
+
+            // Act
+            var result = await _service.GameNightExistsAsync(gameNightId);
+
+            // Assert
+            Assert.True(result);
+            _mockRepository.Verify(repo => repo.GameNightExistsAsync(gameNightId), Times.Once);
+        }
+
+        [Fact]
+        public async Task GameNightExistsAsync_GameNightDoesNotExist_ReturnsFalse()
+        {
+            // Arrange
+            var gameNightId = 1;
+            _mockRepository.Setup(repo => repo.GameNightExistsAsync(gameNightId)).ReturnsAsync(false);
+
+            // Act
+            var result = await _service.GameNightExistsAsync(gameNightId);
+
+            // Assert
+            Assert.False(result);
+            _mockRepository.Verify(repo => repo.GameNightExistsAsync(gameNightId), Times.Once);
+        }
     }
 }
