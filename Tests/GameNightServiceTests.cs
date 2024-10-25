@@ -378,6 +378,82 @@ namespace BordspelAvond.Tests
             _mockRepository.Verify(repo => repo.UpdateAsync(gameNight), Times.Once);
         }
 
+        //----------Foutieve AddGameToGameNightAsync tests------------------->
+        [Fact]
+        public async Task AddGameToGameNightAsync_GameNightNotFound_ReturnsError()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var gameId = 100;
+
+            _mockRepository.Setup(repo => repo.GetByIdWithDetailsAsync(gameNightId))
+                .ReturnsAsync((GameNight)null!); // Simuleer dat de GameNight niet wordt gevonden
+
+            // Act
+            var (success, message) = await _service.AddGameToGameNightAsync(gameNightId, gameId);
+
+            // Assert
+            Assert.False(success);
+            Assert.Equal("GameNight not found", message);
+            _mockRepository.Verify(repo => repo.UpdateAsync(It.IsAny<GameNight>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task AddGameToGameNightAsync_GameNotFound_ReturnsError()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var gameId = 100;
+            var gameNight = new GameNight
+            {
+                Id = gameNightId,
+                GameNightGames = new List<GameNightGame>()
+            };
+
+            _mockRepository.Setup(repo => repo.GetByIdWithDetailsAsync(gameNightId))
+                .ReturnsAsync(gameNight);
+            _mockRepository.Setup(repo => repo.GetGameByIdAsync(gameId))
+                .ReturnsAsync((Game)null!); // Simuleer dat het spel niet wordt gevonden
+
+            // Act
+            var (success, message) = await _service.AddGameToGameNightAsync(gameNightId, gameId);
+
+            // Assert
+            Assert.False(success);
+            Assert.Equal("Game not found", message);
+            _mockRepository.Verify(repo => repo.UpdateAsync(It.IsAny<GameNight>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task AddGameToGameNightAsync_GameAlreadyAdded_ReturnsError()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var gameId = 100;
+            var game = new Game { Id = gameId, Name = "Catan" };
+            var gameNight = new GameNight
+            {
+                Id = gameNightId,
+                GameNightGames = new List<GameNightGame>
+        {
+            new GameNightGame { GameNightId = gameNightId, GameId = gameId }
+        }
+            };
+
+            _mockRepository.Setup(repo => repo.GetByIdWithDetailsAsync(gameNightId))
+                .ReturnsAsync(gameNight);
+            _mockRepository.Setup(repo => repo.GetGameByIdAsync(gameId))
+                .ReturnsAsync(game);
+
+            // Act
+            var (success, message) = await _service.AddGameToGameNightAsync(gameNightId, gameId);
+
+            // Assert
+            Assert.False(success);
+            Assert.Equal("Game is already added to this GameNight.", message);
+            _mockRepository.Verify(repo => repo.UpdateAsync(gameNight), Times.Never);
+        }
+
 
     }
 }
