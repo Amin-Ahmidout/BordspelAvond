@@ -113,5 +113,40 @@ namespace BordspelAvond.Tests
             Assert.Equal("This GameNight is full. No more players can join.", errorMessage);
             _mockRepository.Verify(repo => repo.UpdateAsync(gameNight), Times.Never);
         }
+        //----------Test voor een succesvolle edit------------------->
+        [Fact]
+        public async Task EditGameNightAsync_ValidRequest_ReturnsSuccess()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var userId = "user123";
+            var gameNight = new GameNight
+            {
+                Id = gameNightId,
+                OrganizerId = userId,
+                Participants = new List<GameNightParticipant>(), // Geen deelnemers
+                Address = "Old Address",
+                MaxPlayers = 5
+            };
+            var updatedGameNight = new GameNight
+            {
+                Id = gameNightId,
+                Address = "New Address", // De geüpdatete waarden
+                MaxPlayers = 10
+            };
+
+            _mockRepository.Setup(repo => repo.GetByIdWithParticipantsAsync(gameNightId))
+                .ReturnsAsync(gameNight);
+
+            // Act
+            var (success, errorMessage, updatedResult) = await _service.EditGameNightAsync(gameNightId, updatedGameNight, userId);
+
+            // Assert
+            Assert.True(success);
+            Assert.Null(errorMessage);
+            Assert.Equal("New Address", updatedResult.Address); // Controleer of het adres is bijgewerkt
+            _mockRepository.Verify(repo => repo.UpdateAsync(It.IsAny<GameNight>()), Times.Once);
+        }
+
     }
 }
