@@ -211,6 +211,33 @@ namespace BordspelAvond.Tests
             _mockRepository.Verify(repo => repo.UpdateAsync(It.IsAny<GameNight>()), Times.Never);
         }
 
+        //----------Test voor een succesvolle delete------------------->
+        [Fact]
+        public async Task DeleteGameNightAsync_ValidRequest_ReturnsSuccess()
+        {
+            // Arrange
+            var gameNightId = 1;
+            var userId = "user123";
+            var gameNight = new GameNight
+            {
+                Id = gameNightId,
+                OrganizerId = userId,
+                Participants = new List<GameNightParticipant>() // Geen deelnemers
+            };
+
+            _mockRepository.Setup(repo => repo.GetByIdWithParticipantsAsync(gameNightId))
+                .ReturnsAsync(gameNight);
+
+            // Act
+            var (success, errorMessage) = await _service.DeleteGameNightAsync(gameNightId, userId);
+
+            // Assert
+            Assert.True(success);
+            Assert.Null(errorMessage);
+            _mockRepository.Verify(repo => repo.DeleteAsync(gameNightId), Times.Once);
+        }
+
+
 
     }
 }
