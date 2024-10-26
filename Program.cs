@@ -18,10 +18,27 @@ using BordspelAvond.Presentation.GraphQL;
 var builder = WebApplication.CreateBuilder(args);
 
 // Connection strings instellen
-string bordspelDbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-string authDbConnectionString = builder.Configuration.GetConnectionString("AuthConnection")
-    ?? throw new InvalidOperationException("Connection string 'AuthConnection' not found.");
+string bordspelDbConnectionString;
+string authDbConnectionString;
+
+if (builder.Environment.IsDevelopment())
+{
+    // Gebruik de connection strings uit appsettings.Development.json voor de ontwikkelomgeving
+    bordspelDbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+    authDbConnectionString = builder.Configuration.GetConnectionString("AuthConnection")
+        ?? throw new InvalidOperationException("Connection string 'AuthConnection' not found.");
+}
+else
+{
+    // Gebruik Configuration.GetConnectionString in plaats van Environment.GetEnvironmentVariable
+    bordspelDbConnectionString = builder.Configuration.GetConnectionString("BORDSPELDB_CONNSTR")
+        ?? throw new InvalidOperationException("Connection string 'BORDSPELDB_CONNSTR' not found.");
+
+    authDbConnectionString = builder.Configuration.GetConnectionString("AUTHDB_CONNSTR")
+        ?? throw new InvalidOperationException("Connection string 'AUTHDB_CONNSTR' not found.");
+}
 
 // Voeg BordspelDbContext en AuthDbContext toe
 builder.Services.AddDbContext<BordspelDbContext>(options => options.UseSqlServer(bordspelDbConnectionString));
