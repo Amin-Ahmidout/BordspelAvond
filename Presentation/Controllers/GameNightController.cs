@@ -1,11 +1,11 @@
 ﻿using BordspelAvond.Application.Interfaces;
 using BordspelAvond.Application.Services;
-using BordspelAvond.Models;
+using BordspelAvond.Core.Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace BordspelAvond.Controllers
+namespace BordspelAvond.Presentation.Controllers
 {
     public class GameNightController : Controller
     {
@@ -57,7 +57,7 @@ namespace BordspelAvond.Controllers
             if (!success)
             {
                 TempData["JoinError"] = errorMessage;
-                return RedirectToAction("Details", new { id});
+                return RedirectToAction("Details", new { id });
             }
 
             return RedirectToAction("Details", new { id });

@@ -1,5 +1,6 @@
 ﻿using BordspelAvond.Application.Interfaces;
-using BordspelAvond.Models;
+using BordspelAvond.Core.Domain;
+using BordspelAvond.Core.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

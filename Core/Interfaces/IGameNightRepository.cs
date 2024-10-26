@@ -1,7 +1,7 @@
-﻿using BordspelAvond.Models;
+﻿using BordspelAvond.Core.Domain;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace BordspelAvond.Application.Interfaces
+namespace BordspelAvond.Core.Interfaces
 {
     public interface IGameNightRepository
     {
@@ -18,6 +18,6 @@ namespace BordspelAvond.Application.Interfaces
         Task<IEnumerable<GameNight>> GetParticipatedGamesByUserAsync(string userId);
         Task<Game> GetGameByIdAsync(int id);
         Task<bool> GameNightExistsAsync(int id);
-    
+
     }
 }

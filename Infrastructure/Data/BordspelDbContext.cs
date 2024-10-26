@@ -1,4 +1,4 @@
-﻿using BordspelAvond.Models;
+﻿using BordspelAvond.Core.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 

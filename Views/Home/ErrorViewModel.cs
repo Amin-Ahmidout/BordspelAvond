@@ -1,4 +1,4 @@
-namespace BordspelAvond.Models
+namespace BordspelAvond.Views.Home
 {
     public class ErrorViewModel
     {
