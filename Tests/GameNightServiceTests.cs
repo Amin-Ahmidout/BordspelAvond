@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
 using Xunit;
 using Moq;
-using BordspelAvond.Application.Interfaces;
 using BordspelAvond.Application.Services;
-using BordspelAvond.Models;
 using Microsoft.AspNetCore.Identity;
+using BordspelAvond.Core.Domain;
+using BordspelAvond.Core.Interfaces;
 
 namespace BordspelAvond.Tests
 {

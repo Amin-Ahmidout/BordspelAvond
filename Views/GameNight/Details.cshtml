@@ -1,6 +1,7 @@
-﻿﻿@using Microsoft.AspNetCore.Identity
-@model BordspelAvond.Models.GameNight
-@inject UserManager<BordspelAvond.Models.Player> _userManager
+﻿@using BordspelAvond.Core.Domain
+﻿@using Microsoft.AspNetCore.Identity
+@model GameNight
+@inject UserManager<Player> _userManager
 
 @{
     ViewData["Title"] = "GameNight Details";

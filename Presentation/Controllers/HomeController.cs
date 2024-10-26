@@ -2,7 +2,7 @@ using BordspelAvond.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace BordspelAvond.Controllers
+namespace BordspelAvond.Presentation.Controllers
 {
     public class HomeController : Controller
     {

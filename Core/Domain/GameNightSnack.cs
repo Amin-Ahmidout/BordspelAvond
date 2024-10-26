@@ -1,4 +1,4 @@
-﻿namespace BordspelAvond.Models
+﻿namespace BordspelAvond.Core.Domain
 {
     public class GameNightSnack
     {

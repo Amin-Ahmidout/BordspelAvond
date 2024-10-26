@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace BordspelAvond.Controllers
+namespace BordspelAvond.Presentation.Controllers
 {
     public class GameController : Controller
     {

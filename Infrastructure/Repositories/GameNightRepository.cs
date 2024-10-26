@@ -1,9 +1,9 @@
-﻿using BordspelAvond.Application.Interfaces;
-using BordspelAvond.Models;
+﻿using BordspelAvond.Core.Domain;
+using BordspelAvond.Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace BordspelAvond.Infrastructure
+namespace BordspelAvond.Infrastructure.Repositories
 {
     public class GameNightRepository : IGameNightRepository
     {
@@ -90,7 +90,7 @@ namespace BordspelAvond.Infrastructure
         {
             return await _context.GameNights.AnyAsync(e => e.Id == id);
         }
-        
+
 
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()

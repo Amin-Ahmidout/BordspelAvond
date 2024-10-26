@@ -1,12 +1,13 @@
 ﻿using BordspelAvond.Application.Interfaces;
-using BordspelAvond.Models;
+using BordspelAvond.Core.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace BordspelAvond.ApiControllers
+namespace BordspelAvond.Presentation.ApiControllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -42,6 +43,7 @@ namespace BordspelAvond.ApiControllers
             return Ok(gameNight);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         public async Task<IActionResult> CreateGameNight([FromBody] GameNight gameNight)
         {
@@ -70,7 +72,7 @@ namespace BordspelAvond.ApiControllers
 
 
 
-
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("{id}/join")]
         public async Task<ActionResult> JoinGameNight(int id)
         {
@@ -89,6 +91,7 @@ namespace BordspelAvond.ApiControllers
             return Ok("Successfully joined the GameNight.");
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("{id}/join-with-snack")]
         public async Task<ActionResult> JoinWithSnack(int id, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree)
         {
@@ -109,16 +112,18 @@ namespace BordspelAvond.ApiControllers
             return Ok("Successfully joined the GameNight with a snack.");
         }
 
-
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteGameNight(int id)
         {
-            var userId = _userManager.GetUserId(User);
+            // Haal het userId op uit de claims van de token
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("User not logged in.");
             }
 
+            // Roep de service aan om GameNight te verwijderen
             var (success, errorMessage) = await _gameNightService.DeleteGameNightAsync(id, userId);
             if (!success)
             {
@@ -127,6 +132,7 @@ namespace BordspelAvond.ApiControllers
 
             return Ok("GameNight successfully deleted.");
         }
+
 
     }
 }

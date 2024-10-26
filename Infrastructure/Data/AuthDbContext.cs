@@ -1,8 +1,8 @@
-﻿using BordspelAvond.Models;
+﻿using BordspelAvond.Core.Domain;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace BordspelAvond.Data
+namespace BordspelAvond.Infrastructure.Data
 {
     public class AuthDbContext : IdentityDbContext<Player>
     {

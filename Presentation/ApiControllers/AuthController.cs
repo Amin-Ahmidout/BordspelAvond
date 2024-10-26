@@ -4,10 +4,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using BordspelAvond.Models;
 using System.Threading.Tasks;
+using BordspelAvond.Core.Domain;
 
-namespace BordspelAvond.ApiControllers
+namespace BordspelAvond.Presentation.ApiControllers
 {
     [Route("api/[controller]")]
     [ApiController]

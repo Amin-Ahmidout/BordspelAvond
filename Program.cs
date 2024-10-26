@@ -1,76 +1,68 @@
 using BordspelAvond.Application.Interfaces;
 using BordspelAvond.Application.Services;
-using BordspelAvond.Data;
-using BordspelAvond.Infrastructure;
-using BordspelAvond.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using GraphQL;
+using GraphQL.Server;
+using GraphQL.Types;
+using GraphQL.Server.Ui.Playground;
+using BordspelAvond.Core.Domain;
+using BordspelAvond.Core.Interfaces;
+using BordspelAvond.Infrastructure.Repositories;
+using BordspelAvond.Infrastructure.Data;
+using BordspelAvond.Presentation.GraphQL;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Connection strings instellen
-string bordspelDbConnectionString;
-string authDbConnectionString;
-
-if (builder.Environment.IsDevelopment())
-{
-    bordspelDbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-    authDbConnectionString = builder.Configuration.GetConnectionString("AuthConnection")
-        ?? throw new InvalidOperationException("Connection string 'AuthConnection' not found.");
-}
-else
-{
-    bordspelDbConnectionString = builder.Configuration.GetConnectionString("BORDSPELDB_CONNSTR")
-        ?? throw new InvalidOperationException("Connection string 'BORDSPELDB_CONNSTR' not found.");
-    authDbConnectionString = builder.Configuration.GetConnectionString("AUTHDB_CONNSTR")
-        ?? throw new InvalidOperationException("Connection string 'AUTHDB_CONNSTR' not found.");
-}
+string bordspelDbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+string authDbConnectionString = builder.Configuration.GetConnectionString("AuthConnection")
+    ?? throw new InvalidOperationException("Connection string 'AuthConnection' not found.");
 
 // Voeg BordspelDbContext en AuthDbContext toe
-builder.Services.AddDbContext<BordspelDbContext>(options =>
-    options.UseSqlServer(bordspelDbConnectionString));
+builder.Services.AddDbContext<BordspelDbContext>(options => options.UseSqlServer(bordspelDbConnectionString));
+builder.Services.AddDbContext<AuthDbContext>(options => options.UseSqlServer(authDbConnectionString));
 
-builder.Services.AddDbContext<AuthDbContext>(options =>
-    options.UseSqlServer(authDbConnectionString));
-
-// Configureer Identity met AuthDbContext
+// Identity configureren
 builder.Services.AddDefaultIdentity<Player>()
     .AddEntityFrameworkStores<AuthDbContext>();
 
-// JWT authenticatie configureren
-var jwtKey = builder.Configuration["Jwt:Key"];
-var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+// Configureer authentificatie: Cookies voor webapplicatie en JWT voor API
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key ontbreekt.");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer ontbreekt.");
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = "Bearer";
-    options.DefaultChallengeScheme = "Bearer";
-})
-.AddJwtBearer("Bearer", options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+
+
+builder.Services.AddAuthentication()
+    .AddJwtBearer("Bearer", options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = false,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtIssuer,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!))
-    };
-});
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
 
 // Dependency Injection configureren
 builder.Services.AddScoped<IGameNightService, GameNightService>();
 builder.Services.AddScoped<IGameNightRepository, GameNightRepository>();
 
-// Controllers met Views toevoegen
-builder.Services.AddControllersWithViews();
+// GraphQL configuratie
+builder.Services.AddScoped<ISchema, GameNightSchema>();
+builder.Services.AddScoped<GameNightQuery>();
+builder.Services.AddScoped<GameNightType>();
+builder.Services.AddGraphQL(configure => configure.AddSystemTextJson());
 
-// Voeg Swagger voor API-documentatie toe
+// Controllers en Swagger configureren
+builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -121,7 +113,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configureer het HTTP-verzoekpipeline
+// HTTP-verzoekpipeline configureren
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -138,9 +130,13 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// Voeg authenticatie en autorisatie toe
+// Authenticatie en autorisatie
 app.UseAuthentication();
 app.UseAuthorization();
+
+// GraphQL middleware
+app.UseGraphQL<ISchema>();
+app.UseGraphQLPlayground("/graphql-playground");
 
 app.MapControllerRoute(
     name: "default",

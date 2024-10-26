@@ -1,4 +1,4 @@
-﻿using BordspelAvond.Models;
+﻿using BordspelAvond.Core.Domain;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

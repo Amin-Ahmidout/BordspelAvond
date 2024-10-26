@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace BordspelAvond.Models
+namespace BordspelAvond.Core.Domain
 {
     public class Player : IdentityUser
     {

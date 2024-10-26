@@ -9,7 +9,10 @@
 
   <ItemGroup>
     <PackageReference Include="GraphQL" Version="8.2.1" />
+    <PackageReference Include="GraphQL.MicrosoftDI" Version="8.2.1" />
     <PackageReference Include="GraphQL.Server.Transports.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="GraphQL.Server.Ui.Playground" Version="8.0.3" />
+    <PackageReference Include="GraphQL.SystemTextJson" Version="8.2.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
@@ -35,10 +38,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Migrations\" />
-    <Folder Include="Domain\" />
+    <Folder Include="Infrastructure\Data\Migrations\" />
     <Folder Include="API\" />
-    <Folder Include="Views\Snacks\" />
     <Folder Include="WebApp\" />
   </ItemGroup>
 
