@@ -1,4 +1,5 @@
-using BordspelAvond.Models;
+using BordspelAvond.Core.Domain;
+using BordspelAvond.Views.Home;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
