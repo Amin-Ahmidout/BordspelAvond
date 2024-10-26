@@ -5,6 +5,9 @@ using BordspelAvond.Infrastructure;
 using BordspelAvond.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,39 +17,88 @@ string authDbConnectionString;
 
 if (builder.Environment.IsDevelopment())
 {
-    // Gebruik de connection strings uit appsettings.Development.json voor de ontwikkelomgeving
     bordspelDbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
         ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
     authDbConnectionString = builder.Configuration.GetConnectionString("AuthConnection")
         ?? throw new InvalidOperationException("Connection string 'AuthConnection' not found.");
 }
 else
 {
-    // Gebruik Configuration.GetConnectionString in plaats van Environment.GetEnvironmentVariable
     bordspelDbConnectionString = builder.Configuration.GetConnectionString("BORDSPELDB_CONNSTR")
         ?? throw new InvalidOperationException("Connection string 'BORDSPELDB_CONNSTR' not found.");
-
     authDbConnectionString = builder.Configuration.GetConnectionString("AUTHDB_CONNSTR")
         ?? throw new InvalidOperationException("Connection string 'AUTHDB_CONNSTR' not found.");
 }
 
-// Voeg BordspelDbContext toe
+// Voeg BordspelDbContext en AuthDbContext toe
 builder.Services.AddDbContext<BordspelDbContext>(options =>
     options.UseSqlServer(bordspelDbConnectionString));
 
-// Voeg AuthDbContext toe
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(authDbConnectionString));
 
-// Identity configureren met AuthDbContext
+// Configureer Identity met AuthDbContext
 builder.Services.AddDefaultIdentity<Player>()
     .AddEntityFrameworkStores<AuthDbContext>();
 
+// JWT authenticatie configureren
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = "Bearer";
+    options.DefaultChallengeScheme = "Bearer";
+})
+.AddJwtBearer("Bearer", options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!))
+    };
+});
+
+// Dependency Injection configureren
 builder.Services.AddScoped<IGameNightService, GameNightService>();
 builder.Services.AddScoped<IGameNightRepository, GameNightRepository>();
 
+// Controllers met Views toevoegen
 builder.Services.AddControllersWithViews();
+
+// Voeg Swagger voor API-documentatie toe
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "BordspelAvond API", Version = "v1" });
+    c.EnableAnnotations();
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please insert JWT with Bearer into field",
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 var app = builder.Build();
 
@@ -56,7 +108,6 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        // Zorg ervoor dat de contexten gemigreerd worden
         var bordspelContext = services.GetRequiredService<BordspelDbContext>();
         bordspelContext.Database.Migrate();
 
@@ -70,10 +121,12 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
+// Configureer het HTTP-verzoekpipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseMigrationsEndPoint();
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "BordspelAvond API V1"));
 }
 else
 {
@@ -84,6 +137,8 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+// Voeg authenticatie en autorisatie toe
 app.UseAuthentication();
 app.UseAuthorization();
 
