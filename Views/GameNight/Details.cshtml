@@ -9,83 +9,82 @@
     var isParticipant = Model.Participants.Any(p => p.UserId == currentUserId);
 }
 
-<div class="container">
-    <h1 class="my-4">GameNight Details</h1>
+<div class="container my-5">
+    <h1 class="text-center mb-4" style="color: #7a5c58;">GameNight Details</h1>
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <ul class="nav nav-tabs mb-4" id="gameNightTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab" aria-controls="details" aria-selected="true">Details</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="participants-tab" data-bs-toggle="tab" data-bs-target="#participants" type="button" role="tab" aria-controls="participants" aria-selected="false">Participants</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="games-tab" data-bs-toggle="tab" data-bs-target="#games" type="button" role="tab" aria-controls="games" aria-selected="false">Games</button>
+                </li>
+                @if (Model.IsSnackRequired)
+                {
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="snacks-tab" data-bs-toggle="tab" data-bs-target="#snacks" type="button" role="tab" aria-controls="snacks" aria-selected="false">Snacks</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="join-with-snack-tab" data-bs-toggle="tab" data-bs-target="#join-with-snack" type="button" role="tab" aria-controls="join-with-snack" aria-selected="false">Join with Snack</button>
+                    </li>
+                }
+                @if (isOrganizer)
+                {
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="manage-tab" data-bs-toggle="tab" data-bs-target="#manage" type="button" role="tab" aria-controls="manage" aria-selected="false">Manage</button>
+                    </li>
+                }
+            </ul>
 
-    <ul class="nav nav-tabs" id="gameNightTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab" aria-controls="details" aria-selected="true">Details</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="participants-tab" data-bs-toggle="tab" data-bs-target="#participants" type="button" role="tab" aria-controls="participants" aria-selected="false">Participants</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="games-tab" data-bs-toggle="tab" data-bs-target="#games" type="button" role="tab" aria-controls="games" aria-selected="false">Games</button>
-        </li>
-        @if (Model.IsSnackRequired)
-        {
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="snacks-tab" data-bs-toggle="tab" data-bs-target="#snacks" type="button" role="tab" aria-controls="snacks" aria-selected="false">Snacks</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="join-with-snack-tab" data-bs-toggle="tab" data-bs-target="#join-with-snack" type="button" role="tab" aria-controls="join-with-snack" aria-selected="false">Join with Snack</button>
-            </li>
-        }
-        @if (isOrganizer)
-        {
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="manage-tab" data-bs-toggle="tab" data-bs-target="#manage" type="button" role="tab" aria-controls="manage" aria-selected="false">Manage</button>
-            </li>
-        }
-    </ul>
-
-    <div class="tab-content" id="gameNightTabsContent">
-        <!-- Details Tab -->
-        <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h4 class="card-title">Details</h4>
+            <div class="tab-content" id="gameNightTabsContent">
+                <!-- Details Tab -->
+                <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
+                    <h4 class="mb-3" style="color: #7a5c58;">Details</h4>
                     <dl class="row">
-                        <dt class="col-sm-3">Organizer</dt>
-                        <dd class="col-sm-9">@Model.Organizer.UserName</dd>
+                        <dt class="col-sm-4">Organizer</dt>
+                        <dd class="col-sm-8">@Model.Organizer.UserName</dd>
 
-                        <dt class="col-sm-3">Address</dt>
-                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Address)</dd>
+                        <dt class="col-sm-4">Address</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Address)</dd>
 
-                        <dt class="col-sm-3">Max Players</dt>
-                        <dd class="col-sm-9">@Html.DisplayFor(model => model.MaxPlayers)</dd>
+                        <dt class="col-sm-4">Max Players</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.MaxPlayers)</dd>
 
-                        <dt class="col-sm-3">Date and Time</dt>
-                        <dd class="col-sm-9">@Html.DisplayFor(model => model.DateAndTime)</dd>
+                        <dt class="col-sm-4">Date and Time</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.DateAndTime)</dd>
 
-                        <dt class="col-sm-3">Age Requirement</dt>
-                        <dd class="col-sm-9">
+                        <dt class="col-sm-4">Age Requirement</dt>
+                        <dd class="col-sm-8">
                             <span class="badge @(Model.Is18Plus ? "bg-danger" : "bg-success")">
                                 @(Model.Is18Plus ? "18+" : "All Ages")
                             </span>
                         </dd>
 
-                        <dt class="col-sm-3">Available Food & Drink Options</dt>
-                        <dd class="col-sm-9">
+                        <dt class="col-sm-4">Available Food & Drink Options</dt>
+                        <dd class="col-sm-8">
                             @if (Model.ProvidesVegetarianOptions || Model.ProvidesLactoseFreeOptions ||
                             Model.ProvidesNutsFreeOptions || Model.ProvidesAlcoholFreeOptions)
                             {
                                 <ul>
                                     @if (Model.ProvidesVegetarianOptions)
                                     {
-                                        <li>Vegetarian Options Available</li>
+                                        <li>Vegetarian</li>
                                     }
                                     @if (Model.ProvidesLactoseFreeOptions)
                                     {
-                                        <li>Lactose-Free Options Available</li>
+                                        <li>Lactose-Free</li>
                                     }
                                     @if (Model.ProvidesNutsFreeOptions)
                                     {
-                                        <li>Nut-Free Options Available</li>
+                                        <li>Nut-Free</li>
                                     }
                                     @if (Model.ProvidesAlcoholFreeOptions)
                                     {
-                                        <li>Alcohol-Free Options Available</li>
+                                        <li>Alcohol-Free</li>
                                     }
                                 </ul>
                             }
@@ -94,31 +93,12 @@
                                 <p>No specific dietary options available.</p>
                             }
                         </dd>
-
-                        <dt class="col-sm-3">Snack Requirement</dt>
-                        <dd class="col-sm-9">
-                            <span class="badge @(Model.IsSnackRequired ? "bg-warning" : "bg-secondary")">
-                                @(Model.IsSnackRequired ? "Snack Required" : "Snack Optional")
-                            </span>
-                        </dd>
                     </dl>
-
-                    @if (!isParticipant && !Model.IsSnackRequired)
-                    {
-                        <form asp-action="Join" method="post">
-                            <input type="hidden" name="id" value="@Model.Id" />
-                            <button type="submit" class="btn btn-success">Join this GameNight!</button>
-                        </form>
-                    }
                 </div>
-            </div>
-        </div>
 
-        <!-- Participants Tab -->
-        <div class="tab-pane fade" id="participants" role="tabpanel" aria-labelledby="participants-tab">
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h4 class="card-title">Participants</h4>
+                <!-- Participants Tab -->
+                <div class="tab-pane fade" id="participants" role="tabpanel" aria-labelledby="participants-tab">
+                    <h4 class="mb-3" style="color: #7a5c58;">Participants</h4>
                     @if (Model.Participants != null && Model.Participants.Any())
                     {
                         <ul>
@@ -134,17 +114,12 @@
                         <p>No participants yet.</p>
                     }
                 </div>
-            </div>
-        </div>
 
-        <!-- Games Tab -->
-        <div class="tab-pane fade" id="games" role="tabpanel" aria-labelledby="games-tab">
-            <div class="card mt-4">
-                <div class="card-body">
+                <!-- Games Tab -->
+                <div class="tab-pane fade" id="games" role="tabpanel" aria-labelledby="games-tab">
+                    <h4 class="mb-3" style="color: #7a5c58;">Games</h4>
                     @if (isOrganizer)
                     {
-                        <!-- Alleen tonen als de gebruiker de organizer is -->
-                        <h3>Add Game to GameNight</h3>
                         <form asp-action="AddGameToGameNight" method="post">
                             <input type="hidden" name="gameNightId" value="@Model.Id" />
                             <select name="gameId" class="form-select">
@@ -153,170 +128,77 @@
                                     <option value="@game.Id">@game.Name</option>
                                 }
                             </select>
-                            <button type="submit" class="btn btn-primary">Add Game</button>
+                            <button type="submit" class="btn btn-primary mt-2">Add Game</button>
                         </form>
                     }
-                    else
-                    {
-                        <p>You are not authorized to add games to this GameNight.</p>
-                    }
-                    <h4 class="card-title">Games in this GameNight</h4>
                     <ul>
                         @foreach (var gameNightGame in Model.GameNightGames)
                         {
                             <li>
-                                <strong>@gameNightGame.Game.Name</strong>
-                                <a asp-controller="Game" asp-action="Details" asp-route-id="@gameNightGame.Game.Id" class="btn btn-info btn-sm">Details</a>
+                                @gameNightGame.Game.Name
+                                <a asp-controller="Game" asp-action="Details" asp-route-id="@gameNightGame.Game.Id" class="btn btn-sm btn-info">Details</a>
                             </li>
                         }
                     </ul>
                 </div>
-            </div>
-        </div>
 
-        <!-- Snacks Tab -->
-        @if (Model.IsSnackRequired)
-        {
-            <div class="tab-pane fade" id="snacks" role="tabpanel" aria-labelledby="snacks-tab">
-                <div class="card mt-4">
-                    <div class="card-body">
-                        <h4 class="card-title">Snacks for this GameNight</h4>
+                <!-- Snacks Tab -->
+                @if (Model.IsSnackRequired)
+                {
+                    <div class="tab-pane fade" id="snacks" role="tabpanel" aria-labelledby="snacks-tab">
+                        <h4 class="mb-3" style="color: #7a5c58;">Snacks</h4>
                         <ul>
                             @foreach (var snack in Model.Snacks)
                             {
-                                <li>
-                                    @snack.SnackName
-                                    @if (snack.IsVegetarian)
-                                    {
-                                        <span class="badge bg-success">Vegetarian</span>
-                                    }
-                                    @if (snack.IsLactoseFree)
-                                    {
-                                        <span class="badge bg-info">Lactose-Free</span>
-                                    }
-                                    @if (snack.IsNutFree)
-                                    {
-                                        <span class="badge bg-warning">Nut-Free</span>
-                                    }
-                                    @if (snack.IsAlcoholFree)
-                                    {
-                                        <span class="badge bg-secondary">Alcohol-Free</span>
-                                    }
-                                </li>
+                                <li>@snack.SnackName</li>
                             }
                         </ul>
                     </div>
-                </div>
-            </div>
+                }
 
-            <!-- Join with Snack Tab -->
-            <div class="tab-pane fade" id="join-with-snack" role="tabpanel" aria-labelledby="join-with-snack-tab">
-                <div class="card mt-4">
-                    <div class="card-body">
-                        <h4 class="card-title">Join with a Snack</h4>
+                <!-- Join with Snack Tab -->
+                @if (Model.IsSnackRequired)
+                {
+                    <div class="tab-pane fade" id="join-with-snack" role="tabpanel" aria-labelledby="join-with-snack-tab">
+                        <h4 class="mb-3" style="color: #7a5c58;">Join with a Snack</h4>
                         <form asp-action="JoinWithSnack" method="post">
                             <input type="hidden" name="gameNightId" value="@Model.Id" />
-                            <div class="form-group mb-3">
+                            <div class="form-group">
                                 <label for="snackName">Snack Name</label>
                                 <input type="text" class="form-control" id="snackName" name="snackName" required />
                             </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="isVegetarian" name="isVegetarian" value="true" />
-                                <label class="form-check-label" for="isVegetarian">Vegetarian</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="isLactoseFree" name="isLactoseFree" value="true" />
-                                <label class="form-check-label" for="isLactoseFree">Lactose-Free</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="isNutFree" name="isNutFree" value="true" />
-                                <label class="form-check-label" for="isNutFree">Nut-Free</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="isAlcoholFree" name="isAlcoholFree" value="true" />
-                                <label class="form-check-label" for="isAlcoholFree">Alcohol-Free</label>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Join GameNight and Add Snack</button>
+                            <button type="submit" class="btn btn-primary mt-2">Submit Snack</button>
                         </form>
                     </div>
-                </div>
-            </div>
-        }
+                }
 
-        <!-- Manage Tab -->
-        @if (isOrganizer)
-        {
-            <div class="tab-pane fade" id="manage" role="tabpanel" aria-labelledby="manage-tab">
-                <div class="card mt-4">
-                    <div class="card-body">
-                        <h4 class="card-title">Manage GameNight</h4>
+                <!-- Manage Tab -->
+                @if (isOrganizer)
+                {
+                    <div class="tab-pane fade" id="manage" role="tabpanel" aria-labelledby="manage-tab">
+                        <h4 class="mb-3" style="color: #7a5c58;">Manage GameNight</h4>
                         @if (!Model.Participants.Any())
                         {
-                            <div class="btn-group" role="group">
-                                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure you want to delete this game night?');">
-                                    <button type="submit" class="btn btn-danger">Delete</button>
+                            <div class="d-flex gap-2">
+                                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure you want to delete this GameNight?');">
+                                    <button type="submit" class="btn btn-danger btn-lg">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </button>
                                 </form>
                                 <form asp-action="Edit" asp-route-id="@Model.Id" method="get">
-                                    <button type="submit" class="btn btn-primary">Edit</button>
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
                                 </form>
                             </div>
-                            
                         }
                         else
                         {
-                            <p class="text-danger">Cannot edit or delete a GameNight with participants.</p>
+                            <p class="text-danger">You cannot delete this GameNight as it has participants.</p>
                         }
                     </div>
-                </div>
+                }
             </div>
-        }
+        </div>
     </div>
 </div>
-
-
-
-@section Scripts {
-    <script>
-        @if (TempData["JoinError"] != null)
-        {
-            <text>
-                                alert("@TempData["JoinError"]");
-            </text>
-        }
-
-        @if (TempData["JoinSuccess"] != null)
-        {
-            <text>
-                                alert("@TempData["JoinSuccess"]");
-            </text>
-        }
-
-        @if (TempData["GameAddSuccess"] != null)
-        {
-            <text>
-                                alert("@TempData["GameAddSuccess"]");
-            </text>
-        }
-
-        @if (TempData["GameAddError"] != null)
-        {
-            <text>
-                                alert("@TempData["GameAddError"]");
-            </text>
-        }
-
-        @if (TempData["SnackAddError"] != null)
-        {
-            <text>
-                                alert("@TempData["SnackAddError"]");
-            </text>
-        }
-
-        @if (TempData["SnackAddSuccess"] != null)
-        {
-            <text>
-                                alert("@TempData["SnackAddSuccess"]");
-            </text>
-        }
-    </script>
-}
