@@ -3,7 +3,7 @@
 
 @{
     ViewData["Title"] = "Index";
-   
+
 }
 
 <h1>All Gamenights</h1>
@@ -30,25 +30,48 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
+        @foreach (var item in Model)
+        {
+            <tr>
                 <td>
                     @item.Organizer?.UserName
                 </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Address)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MaxPlayers)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateAndTime)
-            </td>
-            <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> 
-                <a asp-action="Join" asp-route-id="@item.Id" class="btn btn-primary">Join</a>
-            </td>
-        </tr>
-}
+                <td>
+                    @Html.DisplayFor(modelItem => item.Address)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MaxPlayers)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DateAndTime)
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    @{
+                        var isParticipant = item.Participants.Any(p => p.UserId == ViewBag.CurrentUserId);
+                        Console.WriteLine($"GameNight ID: {item.Id}, Is Participant: {isParticipant}"); // Logging toevoegen
+                    }
+                    @if (item.Participants.Any(p => p.UserId == ViewBag.CurrentUserId))
+                    {
+                        
+                        <!-- Melding als de gebruiker al een participant is -->
+                        <button class="btn btn-secondary" onclick="alert('You are already a participant in this GameNight.');">Join</button>
+                    }
+                    else if (!item.IsSnackRequired)
+                    {
+                        <!-- Direct joinen als geen snack vereist is -->
+                        <a asp-action="Join" asp-route-id="@item.Id" class="btn btn-primary">Join</a>
+                    }
+                    else
+                    {
+                        <!-- Naar de details-pagina met Join with Snack-tab -->
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary"
+                           asp-route-tab="join-with-snack"
+                           onclick="alert('You\'ll have to add a snack first!');">Join</a>
+                    }
+                </td>
+            </tr>
+        }
+
     </tbody>
 </table>
