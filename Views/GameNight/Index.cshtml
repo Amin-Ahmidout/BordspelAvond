@@ -3,75 +3,164 @@
 
 @{
     ViewData["Title"] = "Index";
-
 }
 
-<h1>All Gamenights</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.First().Organizer)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Address)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MaxPlayers)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DateAndTime)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @item.Organizer?.UserName
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Address)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.MaxPlayers)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.DateAndTime)
-                </td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a>
-                    @{
-                        var isParticipant = item.Participants.Any(p => p.UserId == ViewBag.CurrentUserId);
-                        Console.WriteLine($"GameNight ID: {item.Id}, Is Participant: {isParticipant}"); // Logging toevoegen
-                    }
-                    @if (item.Participants.Any(p => p.UserId == ViewBag.CurrentUserId))
-                    {
-                        
-                        <!-- Melding als de gebruiker al een participant is -->
-                        <button class="btn btn-secondary" onclick="alert('You are already a participant in this GameNight.');">Join</button>
-                    }
-                    else if (!item.IsSnackRequired)
-                    {
-                        <!-- Direct joinen als geen snack vereist is -->
-                        <a asp-action="Join" asp-route-id="@item.Id" class="btn btn-primary">Join</a>
-                    }
-                    else
-                    {
-                        <!-- Naar de details-pagina met Join with Snack-tab -->
-                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary"
-                           asp-route-tab="join-with-snack"
-                           onclick="alert('You\'ll have to add a snack first!');">Join</a>
-                    }
-                </td>
-            </tr>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameNights</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f3ef;
+            color: #4b4b4b;
+            margin: 0;
+            padding: 20px;
         }
 
-    </tbody>
-</table>
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #7a5c58;
+            margin-bottom: 20px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #7a5c58;
+        }
+
+        a:hover {
+            color: #ad8b86;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #7a5c58;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #ad8b86;
+        }
+
+        .btn-secondary {
+            background-color: #d8c6b9;
+            color: #4b4b4b;
+        }
+
+        .btn-secondary:hover {
+            background-color: #b9a394;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fffdfb;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #e7d6cd;
+            color: #4b4b4b;
+            font-weight: bold;
+        }
+
+        td {
+            border-bottom: 1px solid #ddd;
+        }
+
+        td:last-child {
+            text-align: right;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f6f4;
+        }
+
+        tr:hover {
+            background-color: #f3eae5;
+        }
+
+        .table-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .create-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #7a5c58;
+            color: white;
+            border-radius: 5px;
+            text-align: center;
+            width: fit-content;
+        }
+
+        .create-button:hover {
+            background-color: #ad8b86;
+        }
+    </style>
+</head>
+<body>
+    <h1>All GameNights</h1>
+    <a asp-action="Create" class="create-button">Create New</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.First().Organizer)</th>
+                <th>@Html.DisplayNameFor(model => model.Address)</th>
+                <th>@Html.DisplayNameFor(model => model.MaxPlayers)</th>
+                <th>@Html.DisplayNameFor(model => model.DateAndTime)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Organizer?.UserName</td>
+                    <td>@Html.DisplayFor(modelItem => item.Address)</td>
+                    <td>@Html.DisplayFor(modelItem => item.MaxPlayers)</td>
+                    <td>@Html.DisplayFor(modelItem => item.DateAndTime)</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn-primary">Details</a>
+                        @if (item.Participants.Any(p => p.UserId == ViewBag.CurrentUserId))
+                        {
+                            <button class="btn-secondary" onclick="alert('You are already a participant in this GameNight.');">Join</button>
+                        }
+                        else if (!item.IsSnackRequired)
+                        {
+                            <a asp-action="Join" asp-route-id="@item.Id" class="btn-primary">Join</a>
+                        }
+                        else
+                        {
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn-primary"
+                               asp-route-tab="join-with-snack"
+                               onclick="alert('You\'ll have to add a snack first!');">Join</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>
