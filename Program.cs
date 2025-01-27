@@ -31,6 +31,8 @@ builder.Services.AddDbContext<AuthDbContext>(options => options.UseSqlServer(aut
 builder.Services.AddDefaultIdentity<Player>()
     .AddEntityFrameworkStores<AuthDbContext>();
 
+builder.Services.AddScoped<IGameNightService, GameNightService>();
+
 // Configureer authentificatie: Cookies voor webapplicatie en JWT voor API
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key ontbreekt.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer ontbreekt.");
@@ -62,7 +64,13 @@ builder.Services.AddScoped<GameNightType>();
 builder.Services.AddGraphQL(configure => configure.AddSystemTextJson());
 
 // Controllers en Swagger configureren
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

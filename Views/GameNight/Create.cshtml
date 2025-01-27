@@ -2,69 +2,75 @@
 @model GameNight
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create GameNight";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Create</h1>
+<div class="container my-5">
+    <h1 class="text-center mb-4" style="color: #7a5c58;">Create a New GameNight</h1>
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-<h4>GameNight</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Address" class="control-label"></label>
-                <input asp-for="Address" class="form-control" />
-                <span asp-validation-for="Address" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MaxPlayers" class="control-label"></label>
-                <input asp-for="MaxPlayers" class="form-control" />
-                <span asp-validation-for="MaxPlayers" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DateAndTime" class="control-label"></label>
-                <input asp-for="DateAndTime" class="form-control" />
-                <span asp-validation-for="DateAndTime" class="text-danger"></span>
-            </div>
-            <div class="form-check">
-                <input asp-for="Is18Plus" class="form-check-input" type="checkbox" />
-                <label asp-for="Is18Plus" class="form-check-label">18+ Event</label>
-            </div>
-            <div>
-                <label asp-for="ProvidesVegetarianOptions" class="form-label">Vegetarian Options</label>
-                <input asp-for="ProvidesVegetarianOptions" class="form-check-input" type="checkbox" />
-            </div>
-            <div>
-                <label asp-for="ProvidesLactoseFreeOptions" class="form-label">Lactose Free Options</label>
-                <input asp-for="ProvidesLactoseFreeOptions" class="form-check-input" type="checkbox" />
-            </div>
-            <div>
-                <label asp-for="ProvidesNutsFreeOptions" class="form-label">Nut Free Options</label>
-                <input asp-for="ProvidesNutsFreeOptions" class="form-check-input" type="checkbox" />
-            </div>
-            <div>
-                <label asp-for="ProvidesAlcoholFreeOptions" class="form-label">Alcohol Free Options</label>
-                <input asp-for="ProvidesAlcoholFreeOptions" class="form-check-input" type="checkbox" />
-            </div>
-            <div>
-                <label asp-for="IsSnackRequired" class="form-label">Is Snack Required</label>
-                <input asp-for="IsSnackRequired" class="form-check-input" type="checkbox" />
-            </div>
+                <div class="mb-3">
+                    <label asp-for="Address" class="form-label" style="color: #7a5c58;">Address</label>
+                    <input asp-for="Address" class="form-control" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
 
+                <div class="mb-3">
+                    <label asp-for="MaxPlayers" class="form-label" style="color: #7a5c58;">Maximum Players</label>
+                    <input asp-for="MaxPlayers" class="form-control" />
+                    <span asp-validation-for="MaxPlayers" class="text-danger"></span>
+                </div>
 
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+                <div class="mb-3">
+                    <label asp-for="DateAndTime" class="form-label" style="color: #7a5c58;">Date and Time</label>
+                    <input asp-for="DateAndTime" class="form-control" />
+                    <span asp-validation-for="DateAndTime" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="Is18Plus" class="form-check-input" type="checkbox" />
+                    <label asp-for="Is18Plus" class="form-check-label" style="color: #7a5c58;">18+ Event</label>
+                </div>
+
+                <h4 class="mb-3" style="color: #7a5c58;">Food & Drink Options</h4>
+                <div class="form-check mb-2">
+                    <input asp-for="ProvidesVegetarianOptions" class="form-check-input" type="checkbox" />
+                    <label asp-for="ProvidesVegetarianOptions" class="form-check-label" style="color: #7a5c58;">Vegetarian Options</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input asp-for="ProvidesLactoseFreeOptions" class="form-check-input" type="checkbox" />
+                    <label asp-for="ProvidesLactoseFreeOptions" class="form-check-label" style="color: #7a5c58;">Lactose Free Options</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input asp-for="ProvidesNutsFreeOptions" class="form-check-input" type="checkbox" />
+                    <label asp-for="ProvidesNutsFreeOptions" class="form-check-label" style="color: #7a5c58;">Nut Free Options</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input asp-for="ProvidesAlcoholFreeOptions" class="form-check-input" type="checkbox" />
+                    <label asp-for="ProvidesAlcoholFreeOptions" class="form-check-label" style="color: #7a5c58;">Alcohol Free Options</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input asp-for="IsSnackRequired" class="form-check-input" type="checkbox" />
+                    <label asp-for="IsSnackRequired" class="form-check-label" style="color: #7a5c58;">Snack Required</label>
+                </div>
+
+                <div class="text-center">
+                    <input type="submit" value="Create GameNight" class="btn btn-primary px-4" style="background-color: #7a5c58; border: none;" />
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="text-center mt-3">
+        <a asp-action="Index" class="btn btn-secondary" style="background-color: #ad8b86; border: none;">Back to List</a>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

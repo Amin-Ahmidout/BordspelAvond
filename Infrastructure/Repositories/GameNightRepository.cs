@@ -17,7 +17,8 @@ namespace BordspelAvond.Infrastructure.Repositories
 
         public async Task<IEnumerable<GameNight>> GetAllAsync()
         {
-            return await _context.GameNights.ToListAsync();
+            return await _context.GameNights.Include(g => g.Participants).ToListAsync();
+            
         }
 
         public async Task<GameNight> GetByIdAsync(int id)
