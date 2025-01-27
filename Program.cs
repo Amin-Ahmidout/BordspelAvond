@@ -31,6 +31,8 @@ builder.Services.AddDbContext<AuthDbContext>(options => options.UseSqlServer(aut
 builder.Services.AddDefaultIdentity<Player>()
     .AddEntityFrameworkStores<AuthDbContext>();
 
+builder.Services.AddScoped<IGameNightService, GameNightService>();
+
 // Configureer authentificatie: Cookies voor webapplicatie en JWT voor API
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key ontbreekt.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT Issuer ontbreekt.");

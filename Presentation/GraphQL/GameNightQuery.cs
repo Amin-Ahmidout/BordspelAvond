@@ -6,20 +6,26 @@ namespace BordspelAvond.Presentation.GraphQL
 {
     public class GameNightQuery : ObjectGraphType
     {
-        public GameNightQuery(IGameNightService gameNightService)
+        public GameNightQuery(IServiceProvider serviceProvider)
         {
-            Field<ListGraphType<GameNightType>>(
+            FieldAsync<ListGraphType<GameNightType>>(
                 "gameNights",
-                resolve: context => gameNightService.GetAllGameNightsAsync()
+                resolve: async context =>
+                {
+                    // Haal een nieuwe service-instantie op binnen de scope
+                    var gameNightService = serviceProvider.GetRequiredService<IGameNightService>();
+                    return await gameNightService.GetAllGameNightsAsync();
+                }
             );
 
-            Field<GameNightType>(
+            FieldAsync<GameNightType>(
                 "gameNight",
                 arguments: new QueryArguments(new QueryArgument<IdGraphType> { Name = "id" }),
-                resolve: context =>
+                resolve: async context =>
                 {
                     var id = context.GetArgument<int>("id");
-                    return gameNightService.GetGameNightByIdAsync(id);
+                    var gameNightService = serviceProvider.GetRequiredService<IGameNightService>();
+                    return await gameNightService.GetGameNightByIdAsync(id);
                 }
             );
         }

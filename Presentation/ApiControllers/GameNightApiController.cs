@@ -356,6 +356,53 @@ namespace BordspelAvond.Presentation.ApiControllers
             return Ok("GameNight successfully deleted.");
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost("{gameNightId}/add-game")]
+        public async Task<IActionResult> AddGameToGameNight(int gameNightId, [FromBody] int gameId)
+        {
+            // Log start van de actie
+            _logger.LogInformation($"AddGameToGameNight API called for GameNight ID: {gameNightId} with Game ID: {gameId}");
+
+            // Haal de userId of email op uit de claims
+            var userIdOrEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _logger.LogInformation($"Retrieved userIdOrEmail from token: {userIdOrEmail}");
+
+            if (string.IsNullOrEmpty(userIdOrEmail))
+            {
+                _logger.LogWarning("No valid user ID or email found in token.");
+                return Unauthorized(new { Message = "User not logged in." });
+            }
+
+            // Zoek gebruiker op via e-mail
+            var user = await _userManager.FindByEmailAsync(userIdOrEmail);
+            if (user == null)
+            {
+                _logger.LogWarning($"User with email {userIdOrEmail} not found in the database.");
+                return BadRequest(new { Message = "User not found in the database." });
+            }
+
+            _logger.LogInformation($"User found: {user.UserName}");
+
+            // Roep de service aan om het spel toe te voegen aan de GameNight
+            try
+            {
+                var (success, message) = await _gameNightService.AddGameToGameNightAsync(gameNightId, gameId);
+                if (!success)
+                {
+                    _logger.LogWarning($"Failed to add Game ID: {gameId} to GameNight ID: {gameNightId}. Error: {message}");
+                    return BadRequest(new { Message = message });
+                }
+
+                _logger.LogInformation($"Game ID: {gameId} successfully added to GameNight ID: {gameNightId} by user {user.Id}.");
+                return Ok(new { Message = "Game added to GameNight successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An unexpected error occurred while adding Game ID: {gameId} to GameNight ID: {gameNightId} by user {user.Id}.");
+                return StatusCode(500, new { Message = "An unexpected error occurred. Please try again later." });
+            }
+        }
+
 
     }
 }
