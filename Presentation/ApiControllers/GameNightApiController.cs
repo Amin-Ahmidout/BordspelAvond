@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace BordspelAvond.Presentation.ApiControllers
@@ -183,24 +184,97 @@ namespace BordspelAvond.Presentation.ApiControllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("{id}/join-with-snack")]
-        public async Task<ActionResult> JoinWithSnack(int id, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree)
+        public async Task<ActionResult> JoinWithSnack(int id, [FromBody] JsonElement body)
         {
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userId))
+            // Log start van de actie
+            _logger.LogInformation($"JoinWithSnack API called with GameNight ID: {id}");
+
+            // Haal de userId op uit de token
+            var userIdOrEmail = User.FindFirstValue(ClaimTypes.NameIdentifier); // ID of email
+            _logger.LogInformation($"Retrieved userIdOrEmail from token: {userIdOrEmail}");
+
+            if (string.IsNullOrEmpty(userIdOrEmail))
             {
-                return Unauthorized("User not logged in.");
+                _logger.LogWarning("No valid user ID or email found in token.");
+                return Unauthorized(new { Message = "User not logged in." });
             }
 
-            // Roep de service aan om deelname en snack toe te voegen
-            var (success, errorMessage) = await _gameNightService.JoinGameNightAsync(id, userId, snackName, isVegetarian, isLactoseFree, isNutFree, isAlcoholFree);
+            // Probeer gebruiker te vinden via ID
+            var user = await _userManager.FindByIdAsync(userIdOrEmail);
 
-            if (!success)
+            // Als de gebruiker niet wordt gevonden, probeer dan via email
+            if (user == null)
             {
-                return BadRequest(errorMessage);
+                _logger.LogInformation($"User not found by ID {userIdOrEmail}, trying by email.");
+                user = await _userManager.FindByEmailAsync(userIdOrEmail);
             }
 
-            return Ok("Successfully joined the GameNight with a snack.");
+            // Controleer of de gebruiker bestaat
+            if (user == null)
+            {
+                _logger.LogWarning($"User with ID or email {userIdOrEmail} not found in the database.");
+                return BadRequest(new { Message = "User not found in the database." });
+            }
+
+            _logger.LogInformation($"User found: {user.UserName}");
+
+            try
+            {
+                // Parse de body handmatig
+                if (!body.TryGetProperty("SnackName", out JsonElement snackNameElement) ||
+                    !body.TryGetProperty("IsVegetarian", out JsonElement isVegetarianElement) ||
+                    !body.TryGetProperty("IsLactoseFree", out JsonElement isLactoseFreeElement) ||
+                    !body.TryGetProperty("IsNutFree", out JsonElement isNutFreeElement) ||
+                    !body.TryGetProperty("IsAlcoholFree", out JsonElement isAlcoholFreeElement))
+                {
+                    _logger.LogWarning("One or more required fields are missing in the request body.");
+                    return BadRequest(new { Message = "Invalid request body. Please provide all required fields." });
+                }
+
+                string snackName = snackNameElement.GetString();
+                bool isVegetarian = isVegetarianElement.GetBoolean();
+                bool isLactoseFree = isLactoseFreeElement.GetBoolean();
+                bool isNutFree = isNutFreeElement.GetBoolean();
+                bool isAlcoholFree = isAlcoholFreeElement.GetBoolean();
+
+                _logger.LogInformation($"Snack Details: Name={snackName}, Vegetarian={isVegetarian}, LactoseFree={isLactoseFree}, NutFree={isNutFree}, AlcoholFree={isAlcoholFree}");
+
+                // Roep de service aan om deelname en snack toe te voegen
+                var (success, errorMessage) = await _gameNightService.JoinGameNightAsync(
+                    id,
+                    user.Id, // Gebruik het correcte GUID-ID
+                    snackName,
+                    isVegetarian,
+                    isLactoseFree,
+                    isNutFree,
+                    isAlcoholFree
+                );
+
+                if (!success)
+                {
+                    _logger.LogWarning($"Failed to join GameNight. Error: {errorMessage}");
+                    return BadRequest(new { Message = errorMessage });
+                }
+
+                _logger.LogInformation($"User {user.Id} successfully joined GameNight {id} with a snack.");
+                return Ok(new { Message = "Successfully joined the GameNight with a snack." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogError(ex, "Required properties are missing in the request body.");
+                return BadRequest(new { Message = "Invalid request body. Please provide all required fields." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An unexpected error occurred while user {user.Id} tried to join GameNight {id}.");
+                return StatusCode(500, new { Message = "An unexpected error occurred. Please try again later." });
+            }
         }
+
+
+
+
+
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete("{id}")]
