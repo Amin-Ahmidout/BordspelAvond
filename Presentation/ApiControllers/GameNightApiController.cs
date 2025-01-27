@@ -271,6 +271,65 @@ namespace BordspelAvond.Presentation.ApiControllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPut("{id}/edit")]
+        public async Task<IActionResult> EditGameNight(int id, [FromBody] GameNight updatedGameNight)
+        {
+            // Log start van de actie
+            _logger.LogInformation($"EditGameNight API called with GameNight ID: {id}");
+
+            // Haal de userId of email op uit de claims
+            var userIdOrEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _logger.LogInformation($"Retrieved userIdOrEmail from token: {userIdOrEmail}");
+
+            if (string.IsNullOrEmpty(userIdOrEmail))
+            {
+                _logger.LogWarning("No valid user ID or email found in token.");
+                return Unauthorized(new { Message = "User not logged in." });
+            }
+
+            // Zoek gebruiker op via e-mail
+            var user = await _userManager.FindByEmailAsync(userIdOrEmail);
+            if (user == null)
+            {
+                _logger.LogWarning($"User with email {userIdOrEmail} not found in the database.");
+                return BadRequest(new { Message = "User not found in the database." });
+            }
+
+            _logger.LogInformation($"User found: {user.UserName}");
+
+            // Roep de service aan om de GameNight te bewerken
+            try
+            {
+                var (success, errorMessage, existingGameNight) = await _gameNightService.EditGameNightAsync(id, updatedGameNight, user.Id);
+                if (!success)
+                {
+                    _logger.LogWarning($"Failed to edit GameNight ID: {id}. Error: {errorMessage}");
+                    return BadRequest(new { Message = errorMessage });
+                }
+
+                _logger.LogInformation($"GameNight {id} successfully edited by user {user.Id}.");
+                return Ok(new
+                {
+                    Message = "GameNight edited successfully.",
+                    GameNightId = existingGameNight.Id,
+                    Address = existingGameNight.Address,
+                    MaxPlayers = existingGameNight.MaxPlayers,
+                    DateAndTime = existingGameNight.DateAndTime,
+                    Organizer = new
+                    {
+                        Name = user.UserName,
+                        Email = user.Email
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An unexpected error occurred while user {user.Id} tried to edit GameNight {id}.");
+                return StatusCode(500, new { Message = "An unexpected error occurred. Please try again later." });
+            }
+        }
+
 
 
 
