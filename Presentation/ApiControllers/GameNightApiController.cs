@@ -45,51 +45,141 @@ namespace BordspelAvond.Presentation.ApiControllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
-        public async Task<IActionResult> CreateGameNight([FromBody] GameNight gameNight)
+        public async Task<IActionResult> CreateGameNight([Bind("Address,MaxPlayers,DateAndTime,Is18Plus,ProvidesVegetarianOptions,ProvidesLactoseFreeOptions,ProvidesNutsFreeOptions,ProvidesAlcoholFreeOptions,IsSnackRequired")] GameNight gameNight)
         {
-            // Haal de huidige gebruiker op via het token
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // Log start van de actie
+            _logger.LogInformation("Start CreateGameNight action");
+
+            // Haal de userId of email op uit de token
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Dit is waarschijnlijk een emailadres
+            _logger.LogInformation($"Retrieved userId from token: {userId}");
+
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized("User not authorized to create a GameNight.");
+                _logger.LogWarning("No valid user ID found in token.");
+                return Unauthorized(new { Message = "User not authorized to create a GameNight. Please log in." });
             }
 
-            // Stel het OrganizerId in op het userId van de ingelogde gebruiker
-            gameNight.OrganizerId = userId;
+            // Zoek de gebruiker op met FindByEmailAsync omdat userId een e-mailadres is
+            var organizer = await _userManager.FindByEmailAsync(userId);
+            if (organizer == null)
+            {
+                _logger.LogError($"User with email {userId} not found in the database.");
+                return BadRequest(new { Message = "Organizer not found for the logged-in user." });
+            }
 
-            // Gebruik de service om de GameNight aan te maken
-            var result = await _gameNightService.CreateGameNightAsync(gameNight, userId);
+            _logger.LogInformation($"Organizer found: {organizer.UserName}");
+
+            // Stel de OrganizerId en Organizer in
+            gameNight.OrganizerId = organizer.Id;
+            gameNight.Organizer = organizer;
+
+            _logger.LogInformation($"OrganizerId set to {gameNight.OrganizerId} for the new GameNight.");
+
+            // Controleer of het model geldig is
+            if (!ModelState.IsValid)
+            {
+                var validationErrors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                _logger.LogWarning($"Model validation failed: {string.Join(", ", validationErrors)}");
+                return BadRequest(new
+                {
+                    Message = "Validation failed for the request.",
+                    Errors = validationErrors
+                });
+            }
+
+            _logger.LogInformation($"GameNight model is valid. Proceeding to create GameNight.");
+
+            // Sla de GameNight op via de service
+            var result = await _gameNightService.CreateGameNightAsync(gameNight, organizer.Id);
             if (!result.Success)
             {
-                return BadRequest(result.ErrorMessage);
+                _logger.LogError($"Failed to create GameNight. Error: {result.ErrorMessage}");
+                return BadRequest(new
+                {
+                    Message = "Failed to create GameNight.",
+                    Error = result.ErrorMessage
+                });
             }
-            return Ok(result);
+
+            _logger.LogInformation($"GameNight with ID {gameNight.Id} created successfully by user {organizer.UserName}.");
+
+            // Geef een succesvolle response terug
+            return Ok(new
+            {
+                Message = "GameNight created successfully.",
+                GameNightId = gameNight.Id,
+                OrganizerId = gameNight.OrganizerId,
+                Organizer = new
+                {
+                    Name = organizer.UserName,
+                    Gender = organizer.Gender,
+                    Email = organizer.Email,
+                    BirthDate = organizer.BirthDate,
+                    Street = organizer.Street,
+                    HouseNumber = organizer.HouseNumber,
+                    City = organizer.City
+                }
+            });
         }
-
-
-
-
-
 
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("{id}/join")]
-        public async Task<ActionResult> JoinGameNight(int id)
+        public async Task<IActionResult> JoinGameNight(int id)
         {
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userId))
+            // Log start van de actie
+            _logger.LogInformation($"JoinGameNight API called with GameNight ID: {id}");
+
+            // Haal de userId of email op uit de claims
+            var userIdOrEmail = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _logger.LogInformation($"Retrieved userIdOrEmail from token: {userIdOrEmail}");
+
+            if (string.IsNullOrEmpty(userIdOrEmail))
             {
-                return Unauthorized("User not logged in.");
+                _logger.LogWarning("No valid user ID or email found in token.");
+                return Unauthorized(new { Message = "User not logged in." });
             }
 
-            var (success, errorMessage) = await _gameNightService.JoinGameNightAsync(id, userId);
-            if (!success)
+            // Zoek gebruiker op via e-mail
+            var user = await _userManager.FindByEmailAsync(userIdOrEmail);
+            if (user == null)
             {
-                return BadRequest(errorMessage);
+                _logger.LogWarning($"User with email {userIdOrEmail} not found in the database.");
+                return BadRequest(new { Message = "User not found in the database." });
             }
 
-            return Ok("Successfully joined the GameNight.");
+            _logger.LogInformation($"User found: {user.UserName}");
+
+            // Roep de service aan om de GameNight te joinen
+            try
+            {
+                var (success, errorMessage) = await _gameNightService.JoinGameNightAsync(id, user.Id);
+                if (!success)
+                {
+                    _logger.LogWarning($"Failed to join GameNight. Error: {errorMessage}");
+                    return BadRequest(new { Message = errorMessage });
+                }
+
+                _logger.LogInformation($"User {user.Id} successfully joined GameNight {id}.");
+                return Ok(new { Message = "Successfully joined the GameNight." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An unexpected error occurred while user {user.Id} tried to join GameNight {id}.");
+                return StatusCode(500, new { Message = "An unexpected error occurred. Please try again later." });
+            }
         }
+
+
+
+
+
+
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("{id}/join-with-snack")]
