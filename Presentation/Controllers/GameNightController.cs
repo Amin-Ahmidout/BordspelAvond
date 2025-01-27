@@ -27,6 +27,7 @@ namespace BordspelAvond.Presentation.Controllers
         {
             _logger.LogInformation("Index action called");
             var gameNights = await _gameNightService.GetAllGameNightsAsync();
+            ViewBag.CurrentUserId = _userManager.GetUserId(User);
             return View(gameNights);
         }
 

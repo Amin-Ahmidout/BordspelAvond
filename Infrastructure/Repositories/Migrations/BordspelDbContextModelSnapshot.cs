@@ -21,7 +21,7 @@ namespace BordspelAvond.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("BordspelAvond.Models.Game", b =>
+            modelBuilder.Entity("BordspelAvond.Core.Domain.Game", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -57,7 +57,7 @@ namespace BordspelAvond.Migrations
                     b.ToTable("Games");
                 });
 
-            modelBuilder.Entity("BordspelAvond.Models.GameNight", b =>
+            modelBuilder.Entity("BordspelAvond.Core.Domain.GameNight", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -106,7 +106,7 @@ namespace BordspelAvond.Migrations
                     b.ToTable("GameNights");
                 });
 
-            modelBuilder.Entity("BordspelAvond.Models.GameNightGame", b =>
+            modelBuilder.Entity("BordspelAvond.Core.Domain.GameNightGame", b =>
                 {
                     b.Property<int>("GameNightId")
                         .HasColumnType("int");
@@ -121,7 +121,7 @@ namespace BordspelAvond.Migrations
                     b.ToTable("GameNightGames");
                 });
 
-            modelBuilder.Entity("BordspelAvond.Models.GameNightParticipant", b =>
+            modelBuilder.Entity("BordspelAvond.Core.Domain.GameNightParticipant", b =>
                 {
                     b.Property<int>("GameNightId")
                         .HasColumnType("int");
@@ -134,7 +134,7 @@ namespace BordspelAvond.Migrations
                     b.ToTable("GameNightParticipants");
                 });
 
-            modelBuilder.Entity("BordspelAvond.Models.GameNightSnack", b =>
+            modelBuilder.Entity("BordspelAvond.Core.Domain.GameNightSnack", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -167,22 +167,22 @@ namespace BordspelAvond.Migrations
                     b.ToTable("GameNightSnacks");
                 });
 
-            modelBuilder.Entity("BordspelAvond.Models.GameNight", b =>
+            modelBuilder.Entity("BordspelAvond.Core.Domain.GameNight", b =>
                 {
-                    b.HasOne("BordspelAvond.Models.Game", null)
+                    b.HasOne("BordspelAvond.Core.Domain.Game", null)
                         .WithMany("GameNights")
                         .HasForeignKey("GameId");
                 });
 
-            modelBuilder.Entity("BordspelAvond.Models.GameNightGame", b =>
+            modelBuilder.Entity("BordspelAvond.Core.Domain.GameNightGame", b =>
                 {
-                    b.HasOne("BordspelAvond.Models.Game", "Game")
+                    b.HasOne("BordspelAvond.Core.Domain.Game", "Game")
                         .WithMany()
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BordspelAvond.Models.GameNight", "GameNight")
+                    b.HasOne("BordspelAvond.Core.Domain.GameNight", "GameNight")
                         .WithMany("GameNightGames")
                         .HasForeignKey("GameNightId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -193,9 +193,9 @@ namespace BordspelAvond.Migrations
                     b.Navigation("GameNight");
                 });
 
-            modelBuilder.Entity("BordspelAvond.Models.GameNightParticipant", b =>
+            modelBuilder.Entity("BordspelAvond.Core.Domain.GameNightParticipant", b =>
                 {
-                    b.HasOne("BordspelAvond.Models.GameNight", "GameNight")
+                    b.HasOne("BordspelAvond.Core.Domain.GameNight", "GameNight")
                         .WithMany("Participants")
                         .HasForeignKey("GameNightId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -204,9 +204,9 @@ namespace BordspelAvond.Migrations
                     b.Navigation("GameNight");
                 });
 
-            modelBuilder.Entity("BordspelAvond.Models.GameNightSnack", b =>
+            modelBuilder.Entity("BordspelAvond.Core.Domain.GameNightSnack", b =>
                 {
-                    b.HasOne("BordspelAvond.Models.GameNight", "GameNight")
+                    b.HasOne("BordspelAvond.Core.Domain.GameNight", "GameNight")
                         .WithMany("Snacks")
                         .HasForeignKey("GameNightId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -215,12 +215,12 @@ namespace BordspelAvond.Migrations
                     b.Navigation("GameNight");
                 });
 
-            modelBuilder.Entity("BordspelAvond.Models.Game", b =>
+            modelBuilder.Entity("BordspelAvond.Core.Domain.Game", b =>
                 {
                     b.Navigation("GameNights");
                 });
 
-            modelBuilder.Entity("BordspelAvond.Models.GameNight", b =>
+            modelBuilder.Entity("BordspelAvond.Core.Domain.GameNight", b =>
                 {
                     b.Navigation("GameNightGames");
 
