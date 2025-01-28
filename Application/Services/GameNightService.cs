@@ -42,7 +42,7 @@ namespace BordspelAvond.Application.Services
         }
 
 
-        public async Task<GameNight> GetGameNightByIdAsync(int id)
+        public async Task<GameNight?> GetGameNightByIdAsync(int id)
         {
             return await _gameNightRepository.GetByIdAsync(id);
         }
@@ -236,7 +236,7 @@ namespace BordspelAvond.Application.Services
             }
         }
 
-        public async Task<IEnumerable<GameNight>> GetParticipatedGameNightsAsync(string userId)
+        public async Task<IEnumerable<GameNight?>> GetParticipatedGameNightsAsync(string userId)
         {
             if (string.IsNullOrEmpty(userId))
             {

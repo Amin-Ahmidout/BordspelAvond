@@ -231,7 +231,8 @@ namespace BordspelAvond.Presentation.ApiControllers
                     return BadRequest(new { Message = "Invalid request body. Please provide all required fields." });
                 }
 
-                string snackName = snackNameElement.GetString();
+
+                string snackName = snackNameElement.GetString()!;
                 bool isVegetarian = isVegetarianElement.GetBoolean();
                 bool isLactoseFree = isLactoseFreeElement.GetBoolean();
                 bool isNutFree = isNutFreeElement.GetBoolean();
@@ -312,7 +313,7 @@ namespace BordspelAvond.Presentation.ApiControllers
                 return Ok(new
                 {
                     Message = "GameNight edited successfully.",
-                    GameNightId = existingGameNight.Id,
+                    GameNightId = existingGameNight!.Id,
                     Address = existingGameNight.Address,
                     MaxPlayers = existingGameNight.MaxPlayers,
                     DateAndTime = existingGameNight.DateAndTime,

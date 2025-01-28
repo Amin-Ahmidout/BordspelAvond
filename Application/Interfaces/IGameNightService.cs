@@ -7,7 +7,7 @@ namespace BordspelAvond.Application.Interfaces
     public interface IGameNightService
     {
         Task<IEnumerable<GameNight>> GetAllGameNightsAsync();
-        Task<GameNight> GetGameNightByIdAsync(int id);
+        Task<GameNight?> GetGameNightByIdAsync(int id);
         Task<IEnumerable<GameNight>> GetGameNightsByOrganizerAsync(string organizerId);
         Task AddGameNightAsync(GameNight gameNight);
         Task UpdateGameNightAsync(GameNight gameNight);
@@ -19,7 +19,7 @@ namespace BordspelAvond.Application.Interfaces
         Task<IEnumerable<Game>> GetAvailableGamesAsync();
         Task<GameNight> GetGameNightDetailsAsync(int id);
         Task<(bool Success, string? ErrorMessage)> CreateGameNightAsync(GameNight gameNight, string userId);
-        Task<IEnumerable<GameNight>> GetParticipatedGameNightsAsync(string userId);
+        Task<IEnumerable<GameNight?>> GetParticipatedGameNightsAsync(string userId);
         Task<(bool Success, string? ErrorMessage, GameNight? GameNight)> EditGameNightAsync(int id, GameNight gameNight, string userId);
         Task<GameNight?> GetGameNightForEditAsync(int id, string userId);
         Task<(bool Success, string? ErrorMessage, GameNight? GameNight)> GetGameNightForDeleteAsync(int id, string userId);

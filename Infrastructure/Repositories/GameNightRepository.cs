@@ -21,7 +21,7 @@ namespace BordspelAvond.Infrastructure.Repositories
             
         }
 
-        public async Task<GameNight> GetByIdAsync(int id)
+        public async Task<GameNight?> GetByIdAsync(int id)
         {
             return await _context.GameNights.FirstOrDefaultAsync(g => g.Id == id);
         }
@@ -53,14 +53,14 @@ namespace BordspelAvond.Infrastructure.Repositories
             }
         }
 
-        public async Task<GameNight> GetByIdWithParticipantsAsync(int id)
+        public async Task<GameNight?> GetByIdWithParticipantsAsync(int id)
         {
             return await _context.GameNights
                 .Include(g => g.Participants)  // Include the participants in the query
                 .FirstOrDefaultAsync(g => g.Id == id);
         }
 
-        public async Task<GameNight> GetByIdWithDetailsAsync(int id)
+        public async Task<GameNight?> GetByIdWithDetailsAsync(int id)
         {
             return await _context.GameNights
                 .Include(g => g.Participants)
@@ -74,7 +74,7 @@ namespace BordspelAvond.Infrastructure.Repositories
         {
             return await _context.Games.ToListAsync();
         }
-        public async Task<IEnumerable<GameNight>> GetParticipatedGamesByUserAsync(string userId)
+        public async Task<IEnumerable<GameNight?>> GetParticipatedGamesByUserAsync(string userId)
         {
             return await _context.GameNightParticipants
                 .Include(p => p.GameNight)
@@ -82,7 +82,7 @@ namespace BordspelAvond.Infrastructure.Repositories
                 .Select(p => p.GameNight)
                 .ToListAsync();
         }
-        public async Task<Game> GetGameByIdAsync(int id)
+        public async Task<Game?> GetGameByIdAsync(int id)
         {
             return await _context.Games.FindAsync(id);
         }
