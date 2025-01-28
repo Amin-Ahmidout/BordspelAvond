@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using BordspelAvond.Core.Domain;
+using System.ComponentModel.DataAnnotations;
 
 namespace BordspelAvond.Presentation.ApiControllers
 {
@@ -53,6 +54,56 @@ namespace BordspelAvond.Presentation.ApiControllers
                 expiration = token.ValidTo
             });
         }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        {
+            // Validatie van de request body
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // Controleer of de gebruiker al bestaat
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+                return Conflict(new { message = "Email is already registered." });
+
+            // Bereken leeftijd
+            var today = DateTime.Today;
+            var age = today.Year - model.BirthDate.Year;
+            if (model.BirthDate.Date > today.AddYears(-age)) age--;
+
+            if (age < 16)
+                return BadRequest(new { message = "You must be at least 16 years old to register." });
+
+            // Maak een nieuwe gebruiker aan
+            var user = new Player
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                Name = model.Name,
+                BirthDate = model.BirthDate,
+                Gender = model.Gender,
+                City = model.City,
+                Street = model.Street,
+                HouseNumber = model.HouseNumber,
+                IsVegetarian = model.IsVegetarian,
+                HasLactoseAllergy = model.HasLactoseAllergy,
+                HasNutsAllergy = model.HasNutsAllergy,
+                AvoidsAlcohol = model.AvoidsAlcohol
+            };
+
+            // Maak de gebruiker aan met een wachtwoord
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (!result.Succeeded)
+                return BadRequest(new { message = "Registration failed.", errors = result.Errors });
+
+            return Ok(new
+            {
+                message = "Registration successful!",
+                userId = user.Id
+            });
+        }
+
     }
 
     public class LoginModel
@@ -60,4 +111,31 @@ namespace BordspelAvond.Presentation.ApiControllers
         public string? Email { get; set; }
         public string? Password { get; set; }
     }
+
+    public class RegisterModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
+        public DateTime BirthDate { get; set; }
+
+        public string? Gender { get; set; }
+        public string? City { get; set; }
+        public string? Street { get; set; }
+        public string? HouseNumber { get; set; }
+        public bool IsVegetarian { get; set; }
+        public bool HasLactoseAllergy { get; set; }
+        public bool HasNutsAllergy { get; set; }
+        public bool AvoidsAlcohol { get; set; }
+
+        [Required]
+        [MinLength(6)]
+        public string Password { get; set; } = string.Empty;
+    }
+
 }
