@@ -49,7 +49,7 @@ namespace BordspelAvond.Presentation.ApiControllers
         public async Task<ActionResult<IEnumerable<GameNight>>> GetOrganizedGameNights()
         {
             // Haal de userId of email op uit de token
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Dit is waarschijnlijk een emailadres
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             _logger.LogInformation($"Retrieved userId from token: {userId}");
 
             if (string.IsNullOrEmpty(userId))
@@ -75,6 +75,38 @@ namespace BordspelAvond.Presentation.ApiControllers
             return Ok(organizedGames);
         }
 
+        [HttpGet("participated")]
+        [Authorize(AuthenticationSchemes = "Bearer")] // Alleen geauthenticeerde gebruikers
+        public async Task<ActionResult<IEnumerable<GameNight>>> GetParticipatedGames()
+        {
+            // Haal de userId of email op uit de token
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _logger.LogInformation($"Retrieved userId from token: {userId}");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("No valid user ID found in token.");
+                return Unauthorized(new { Message = "User not logged in or unauthorized." });
+            }
+
+            // Zoek de gebruiker op via email
+            var user = await _userManager.FindByEmailAsync(userId);
+            if (user == null)
+            {
+                _logger.LogError($"User with email {userId} not found in the database.");
+                return BadRequest(new { Message = "User not found in the database." });
+            }
+
+            _logger.LogInformation($"User found: {user.UserName}");
+
+            // Gebruik de service om deelgenomen spelavonden op te halen
+            var participatedGames = await _gameNightService.GetParticipatedGameNightsAsync(user.Id);
+            _logger.LogInformation($"Participated games count: {participatedGames.Count()}");
+
+            return Ok(participatedGames);
+        }
+
+
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
@@ -84,7 +116,7 @@ namespace BordspelAvond.Presentation.ApiControllers
             _logger.LogInformation("Start CreateGameNight action");
 
             // Haal de userId of email op uit de token
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Dit is waarschijnlijk een emailadres
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); 
             _logger.LogInformation($"Retrieved userId from token: {userId}");
 
             if (string.IsNullOrEmpty(userId))

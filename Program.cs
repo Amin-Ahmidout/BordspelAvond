@@ -139,7 +139,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // HTTP-verzoekpipeline configureren
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
