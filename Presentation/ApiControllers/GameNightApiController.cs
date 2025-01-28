@@ -44,6 +44,38 @@ namespace BordspelAvond.Presentation.ApiControllers
             return Ok(gameNight);
         }
 
+        [HttpGet("organized")]
+        [Authorize(AuthenticationSchemes = "Bearer")] // Zorgt ervoor dat alleen geauthenticeerde gebruikers toegang hebben
+        public async Task<ActionResult<IEnumerable<GameNight>>> GetOrganizedGameNights()
+        {
+            // Haal de userId of email op uit de token
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Dit is waarschijnlijk een emailadres
+            _logger.LogInformation($"Retrieved userId from token: {userId}");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("No valid user ID found in token.");
+                return Unauthorized(new { Message = "User not logged in or unauthorized." });
+            }
+
+            // Zoek de gebruiker op met FindByEmailAsync omdat userId een e-mailadres is
+            var user = await _userManager.FindByEmailAsync(userId);
+            if (user == null)
+            {
+                _logger.LogError($"User with email {userId} not found in the database.");
+                return BadRequest(new { Message = "User not found in the database." });
+            }
+
+            _logger.LogInformation($"User found: {user.UserName}");
+
+            // Gebruik de service om de georganiseerde games op te halen
+            var organizedGames = await _gameNightService.GetGameNightsByOrganizerAsync(user.Id);
+            _logger.LogInformation($"Organized games count: {organizedGames.Count()}");
+
+            return Ok(organizedGames);
+        }
+
+
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         public async Task<IActionResult> CreateGameNight([Bind("Address,MaxPlayers,DateAndTime,Is18Plus,ProvidesVegetarianOptions,ProvidesLactoseFreeOptions,ProvidesNutsFreeOptions,ProvidesAlcoholFreeOptions,IsSnackRequired")] GameNight gameNight)

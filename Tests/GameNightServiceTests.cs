@@ -612,7 +612,7 @@ namespace BordspelAvond.Tests
             // Assert
             Assert.NotNull(result);
             Assert.Equal(participatedGameNights.Count, result.Count());
-            Assert.Equal(participatedGameNights[0].Address, result.First().Address);
+            Assert.Equal(participatedGameNights[0].Address, result?.First()?.Address);
             _mockRepository.Verify(repo => repo.GetParticipatedGamesByUserAsync(userId), Times.Once);
         }
 
