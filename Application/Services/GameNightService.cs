@@ -67,7 +67,7 @@ namespace BordspelAvond.Application.Services
             await _gameNightRepository.DeleteAsync(id);
         }
 
-        public async Task<(bool Success, string ErrorMessage)> JoinGameNightAsync(int gameNightId, string userId, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree)
+        public async Task<(bool Success, string? ErrorMessage)> JoinGameNightAsync(int gameNightId, string userId, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree)
         {
             var gameNight = await _gameNightRepository.GetByIdWithParticipantsAsync(gameNightId);
             if (gameNight == null)
@@ -82,6 +82,10 @@ namespace BordspelAvond.Application.Services
             }
 
             var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return (false, "User not found.");
+            }
 
             // Controleer de leeftijdsrestrictie
             if (gameNight.Is18Plus)
@@ -208,11 +212,11 @@ namespace BordspelAvond.Application.Services
                 }
             }
 
-            return gameNight;
+            return gameNight!;
         }
 
 
-        public async Task<(bool Success, string ErrorMessage)> CreateGameNightAsync(GameNight gameNight, string userId)
+        public async Task<(bool Success, string? ErrorMessage)> CreateGameNightAsync(GameNight gameNight, string userId)
         {
             if (string.IsNullOrEmpty(userId))
             {
@@ -228,9 +232,10 @@ namespace BordspelAvond.Application.Services
             }
             catch (Exception ex)
             {
-                return (false, "An error occurred while saving the game night. Please try again.");
+                return (false, $"An error occurred while saving the game night: {ex.Message}");
             }
         }
+
         public async Task<IEnumerable<GameNight>> GetParticipatedGameNightsAsync(string userId)
         {
             if (string.IsNullOrEmpty(userId))
@@ -243,7 +248,8 @@ namespace BordspelAvond.Application.Services
 
             return participatedGames;
         }
-        public async Task<(bool Success, string ErrorMessage, GameNight GameNight)> EditGameNightAsync(int id, GameNight gameNight, string userId)
+
+        public async Task<(bool Success, string? ErrorMessage, GameNight? GameNight)> EditGameNightAsync(int id, GameNight gameNight, string userId)
         {
             var existingGameNight = await _gameNightRepository.GetByIdWithParticipantsAsync(id);
             if (existingGameNight == null)
@@ -280,7 +286,7 @@ namespace BordspelAvond.Application.Services
             }
         }
 
-        public async Task<GameNight> GetGameNightForEditAsync(int id, string userId)
+        public async Task<GameNight?> GetGameNightForEditAsync(int id, string userId)
         {
             var gameNight = await _gameNightRepository.GetByIdWithParticipantsAsync(id);
             if (gameNight == null || gameNight.OrganizerId != userId)
@@ -289,7 +295,8 @@ namespace BordspelAvond.Application.Services
             }
             return gameNight;
         }
-        public async Task<(bool Success, string ErrorMessage, GameNight GameNight)> GetGameNightForDeleteAsync(int id, string userId)
+
+        public async Task<(bool Success, string? ErrorMessage, GameNight? GameNight)> GetGameNightForDeleteAsync(int id, string userId)
         {
             var gameNight = await _gameNightRepository.GetByIdWithParticipantsAsync(id);
             if (gameNight == null)
@@ -310,7 +317,7 @@ namespace BordspelAvond.Application.Services
             return (true, null, gameNight);
         }
 
-        public async Task<(bool Success, string ErrorMessage)> DeleteGameNightAsync(int id, string userId)
+        public async Task<(bool Success, string? ErrorMessage)> DeleteGameNightAsync(int id, string userId)
         {
             var gameNight = await _gameNightRepository.GetByIdWithParticipantsAsync(id);
             if (gameNight == null)
@@ -335,7 +342,7 @@ namespace BordspelAvond.Application.Services
             }
             catch (Exception ex)
             {
-                return (false, "An error occurred while deleting the GameNight. Please try again.");
+                return (false, $"An error occurred while deleting the GameNight. Please try again {ex}");
             }
         }
 
@@ -376,7 +383,7 @@ namespace BordspelAvond.Application.Services
             return await _gameNightRepository.GameNightExistsAsync(id);
         }
 
-        public async Task<(bool Success, string ErrorMessage)> AddSnackToGameNightAsync(int gameNightId, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree)
+        public async Task<(bool Success, string? ErrorMessage)> AddSnackToGameNightAsync(int gameNightId, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree)
         {
             var gameNight = await _gameNightRepository.GetByIdWithDetailsAsync(gameNightId);
             if (gameNight == null)

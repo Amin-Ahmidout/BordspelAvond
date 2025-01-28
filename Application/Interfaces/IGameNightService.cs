@@ -18,15 +18,15 @@ namespace BordspelAvond.Application.Interfaces
 
         Task<IEnumerable<Game>> GetAvailableGamesAsync();
         Task<GameNight> GetGameNightDetailsAsync(int id);
-        Task<(bool Success, string ErrorMessage)> CreateGameNightAsync(GameNight gameNight, string userId);
+        Task<(bool Success, string? ErrorMessage)> CreateGameNightAsync(GameNight gameNight, string userId);
         Task<IEnumerable<GameNight>> GetParticipatedGameNightsAsync(string userId);
-        Task<(bool Success, string ErrorMessage, GameNight GameNight)> EditGameNightAsync(int id, GameNight gameNight, string userId);
-        Task<GameNight> GetGameNightForEditAsync(int id, string userId);
-        Task<(bool Success, string ErrorMessage, GameNight GameNight)> GetGameNightForDeleteAsync(int id, string userId);
-        Task<(bool Success, string ErrorMessage)> DeleteGameNightAsync(int id, string userId);
+        Task<(bool Success, string? ErrorMessage, GameNight? GameNight)> EditGameNightAsync(int id, GameNight gameNight, string userId);
+        Task<GameNight?> GetGameNightForEditAsync(int id, string userId);
+        Task<(bool Success, string? ErrorMessage, GameNight? GameNight)> GetGameNightForDeleteAsync(int id, string userId);
+        Task<(bool Success, string? ErrorMessage)> DeleteGameNightAsync(int id, string userId);
         Task<(bool Success, string ErrorMessage)> AddGameToGameNightAsync(int gameNightId, int gameId);
         Task<bool> GameNightExistsAsync(int id);
-        Task<(bool Success, string ErrorMessage)> AddSnackToGameNightAsync(int gameNightId, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree);
+        Task<(bool Success, string? ErrorMessage)> AddSnackToGameNightAsync(int gameNightId, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree);
 
     }
 }
