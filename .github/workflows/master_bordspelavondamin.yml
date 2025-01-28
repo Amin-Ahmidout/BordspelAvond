@@ -18,23 +18,11 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Restore dependencies
-        run: dotnet restore
-
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
-      - name: Run tests and collect results
-        run: |
-          dotnet test --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx"
-        continue-on-error: true
-
-      - name: Publish test results
-        if: always() # Zorg ervoor dat de resultaten worden geüpload, zelfs als de tests falen
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: '**/TestResults/*.trx'
+      - name: Run tests
+        run: dotnet test --configuration Release --verbosity normal
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ./myapp

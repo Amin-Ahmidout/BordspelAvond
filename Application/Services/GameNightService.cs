@@ -86,6 +86,7 @@ namespace BordspelAvond.Application.Services
             // Controleer de leeftijdsrestrictie
             if (gameNight.Is18Plus)
             {
+
                 var age = DateTime.Today.Year - user.BirthDate.Year;
                 if (user.BirthDate.Date > DateTime.Today.AddYears(-age)) age--;
                 if (age < 18)
@@ -146,6 +147,11 @@ namespace BordspelAvond.Application.Services
             // Controleer de leeftijdsrestrictie
             if (gameNight.Is18Plus)
             {
+                if (user?.BirthDate == null)
+                {
+                    return (false, "User's birth date is required to validate age.");
+                }
+
                 var age = DateTime.Today.Year - user.BirthDate.Year;
                 if (user.BirthDate.Date > DateTime.Today.AddYears(-age)) age--;
                 if (age < 18)
