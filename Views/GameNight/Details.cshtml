@@ -58,7 +58,16 @@
                     <h4 class="mb-3" style="color: #7a5c58;">Details</h4>
                     <dl class="row">
                         <dt class="col-sm-4">Organizer</dt>
-                        <dd class="col-sm-8">@Model.Organizer.UserName</dd>
+                        <dd class="col-sm-8">
+                            @if (Model.Organizer != null && !string.IsNullOrEmpty(Model.Organizer.UserName))
+                            {
+                                @Model.Organizer.UserName
+                            }
+                            else
+                            {
+                                <span class="text-muted">Unknown Organizer</span>
+                            }
+                        </dd>
 
                         <dt class="col-sm-4">Address</dt>
                         <dd class="col-sm-8">@Html.DisplayFor(model => model.Address)</dd>
@@ -121,10 +130,13 @@
                     @if (Model.Participants != null && Model.Participants.Any())
                     {
                         <ul>
-                            @foreach (var participant in Model.Participants)
+                            @foreach (var userId in Model.Participants.Select(p => p.UserId).Distinct())
                             {
-                                var user = await _userManager.FindByIdAsync(participant.UserId);
-                                <li>@user?.UserName</li>
+                                var user = await _userManager.FindByIdAsync(userId!);
+                                if (user != null)
+                                {
+                                    <li>@user.UserName</li>
+                                }
                             }
                         </ul>
                     }
@@ -236,7 +248,7 @@
                 {
                     <div class="tab-pane fade" id="manage" role="tabpanel" aria-labelledby="manage-tab">
                         <h4 class="mb-3" style="color: #7a5c58;">Manage GameNight</h4>
-                        @if (!Model.Participants.Any())
+                        @if (Model.Participants != null && !Model.Participants.Any())
                         {
                             <div class="d-flex gap-2">
                                 <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure you want to delete this GameNight?');">

@@ -133,6 +133,12 @@ namespace BordspelAvond.Presentation.Controllers
             {
                 // Haal de organisator op
                 var organizerId = _userManager.GetUserId(User);
+                if (string.IsNullOrEmpty(organizerId))
+                {
+                    ModelState.AddModelError(string.Empty, "Unable to retrieve your account information. Please log in again.");
+                    return View(gameNight);
+                }
+
                 var organizer = await _userManager.FindByIdAsync(organizerId);
 
                 if (organizer != null)
@@ -155,7 +161,9 @@ namespace BordspelAvond.Presentation.Controllers
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, errorMessage);
+                        var safeErrorMessage = errorMessage ?? "An unexpected error occurred.";
+                        ModelState.AddModelError(string.Empty, safeErrorMessage);
+                        return View(gameNight);
                     }
                 }
                 else
@@ -198,6 +206,12 @@ namespace BordspelAvond.Presentation.Controllers
             }
 
             var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("Edit action called without a logged-in user");
+                return Unauthorized();
+            }
+
             var gameNight = await _gameNightService.GetGameNightForEditAsync(id.Value, userId);
 
             if (gameNight == null)
@@ -214,11 +228,18 @@ namespace BordspelAvond.Presentation.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,Address,MaxPlayers,DateAndTime,ProvidesVegetarianOptions,ProvidesLactoseFreeOptions,ProvidesNutsFreeOptions,ProvidesAlcoholFreeOptions")] GameNight gameNight)
         {
             var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("Edit action called without a logged-in user");
+                return Unauthorized();
+            }
+
             var (success, errorMessage, existingGameNight) = await _gameNightService.EditGameNightAsync(id, gameNight, userId);
 
             if (!success)
             {
-                ModelState.AddModelError(string.Empty, errorMessage);
+                var safeErrorMessage = errorMessage ?? "An unexpected error occurred.";
+                ModelState.AddModelError(string.Empty, safeErrorMessage);
                 return View(existingGameNight ?? gameNight);
             }
 
@@ -236,11 +257,18 @@ namespace BordspelAvond.Presentation.Controllers
             }
 
             var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("Edit action called without a logged-in user");
+                return Unauthorized();
+            }
+
             var (success, errorMessage, gameNight) = await _gameNightService.GetGameNightForDeleteAsync(id.Value, userId);
 
             if (!success)
             {
-                ModelState.AddModelError(string.Empty, errorMessage);
+                var safeErrorMessage = errorMessage ?? "An unexpected error occurred.";
+                ModelState.AddModelError(string.Empty, safeErrorMessage);
                 return View("Details", gameNight);
             }
 
@@ -253,11 +281,18 @@ namespace BordspelAvond.Presentation.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("Edit action called without a logged-in user");
+                return Unauthorized();
+            }
+
             var (success, errorMessage) = await _gameNightService.DeleteGameNightAsync(id, userId);
 
             if (!success)
             {
-                ModelState.AddModelError(string.Empty, errorMessage);
+                var safeErrorMessage = errorMessage ?? "An unexpected error occurred.";
+                ModelState.AddModelError(string.Empty, safeErrorMessage);
                 return RedirectToAction(nameof(Details), new { id });
             }
 
