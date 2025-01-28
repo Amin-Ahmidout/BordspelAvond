@@ -37,7 +37,8 @@ namespace BordspelAvond.Presentation.Controllers
             var organizerId = _userManager.GetUserId(User);
             if (organizerId == null)
             {
-                return RedirectToAction("Login", "Account");
+                var returnUrl = Url.Action("MyParticipatedGames", "GameNight");
+                return Redirect($"/Identity/Account/Login?ReturnUrl={returnUrl}");
             }
 
             var organizedGames = await _gameNightService.GetGameNightsByOrganizerAsync(organizerId);
@@ -188,7 +189,8 @@ namespace BordspelAvond.Presentation.Controllers
             var userId = _userManager.GetUserId(User);
             if (userId == null)
             {
-                return RedirectToAction("Login", "Account");
+                var returnUrl = Url.Action("MyParticipatedGames", "GameNight");
+                return Redirect($"/Identity/Account/Login?ReturnUrl={returnUrl}");
             }
 
             var participatedGames = await _gameNightService.GetParticipatedGameNightsAsync(userId);
