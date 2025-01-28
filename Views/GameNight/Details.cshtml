@@ -11,6 +11,18 @@
 
 <div class="container my-5">
     <h1 class="text-center mb-4" style="color: #7a5c58;">GameNight Details</h1>
+    @if (TempData["JoinError"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["JoinError"]
+        </div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
     <div class="card shadow-lg">
         <div class="card-body">
             <ul class="nav nav-tabs mb-4" id="gameNightTabs" role="tablist">

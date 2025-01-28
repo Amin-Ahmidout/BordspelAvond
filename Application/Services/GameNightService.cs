@@ -128,7 +128,7 @@ namespace BordspelAvond.Application.Services
             return (true, null);
         }
 
-        public async Task<(bool Success, string ErrorMessage)> JoinGameNightAsync(int gameNightId, string userId)
+        public async Task<(bool Success, string? ErrorMessage)> JoinGameNightAsync(int gameNightId, string userId)
         {
             var gameNight = await _gameNightRepository.GetByIdWithParticipantsAsync(gameNightId);
             if (gameNight == null)
@@ -143,6 +143,12 @@ namespace BordspelAvond.Application.Services
             }
 
             var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return (false, "User not found.");
+            }
+            Console.WriteLine($"User Diet Preferences: Vegetarian={user.IsVegetarian}, LactoseFree={user.HasLactoseAllergy}, NutsFree={user.HasNutsAllergy}, AlcoholFree={user.AvoidsAlcohol}");
+            Console.WriteLine($"GameNight Options: Vegetarian={gameNight.ProvidesVegetarianOptions}, LactoseFree={gameNight.ProvidesLactoseFreeOptions}, NutsFree={gameNight.ProvidesNutsFreeOptions}, AlcoholFree={gameNight.ProvidesAlcoholFreeOptions}");
 
             // Controleer de leeftijdsrestrictie
             if (gameNight.Is18Plus)

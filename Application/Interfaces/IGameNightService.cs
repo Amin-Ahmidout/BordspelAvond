@@ -13,8 +13,8 @@ namespace BordspelAvond.Application.Interfaces
         Task UpdateGameNightAsync(GameNight gameNight);
         Task DeleteGameNightAsync(int id);
 
-        Task<(bool Success, string ErrorMessage)> JoinGameNightAsync(int gameNightId, string userId);
-        Task<(bool Success, string ErrorMessage)> JoinGameNightAsync(int gameNightId, string userId, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree);
+        Task<(bool Success, string? ErrorMessage)> JoinGameNightAsync(int gameNightId, string userId);
+        Task<(bool Success, string? ErrorMessage)> JoinGameNightAsync(int gameNightId, string userId, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree);
 
         Task<IEnumerable<Game>> GetAvailableGamesAsync();
         Task<GameNight> GetGameNightDetailsAsync(int id);
