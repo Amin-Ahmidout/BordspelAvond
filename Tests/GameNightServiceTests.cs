@@ -144,7 +144,7 @@ namespace BordspelAvond.Tests
             // Assert
             Assert.True(success);
             Assert.Null(errorMessage);
-            Assert.Equal("New Address", updatedResult.Address); // Controleer of het adres is bijgewerkt
+            Assert.Equal("New Address", updatedResult?.Address); // Controleer of het adres is bijgewerkt
             _mockRepository.Verify(repo => repo.UpdateAsync(It.IsAny<GameNight>()), Times.Once);
         }
 
@@ -477,8 +477,8 @@ namespace BordspelAvond.Tests
 
             // Assert
             Assert.Equal(2, result.Count());
-            Assert.Equal("Organizer1", result.First().Organizer.UserName);
-            Assert.Equal("Organizer2", result.Last().Organizer.UserName);
+            Assert.Equal("Organizer1", result?.First().Organizer?.UserName);
+            Assert.Equal("Organizer2", result?.Last().Organizer?.UserName);
         }
 
         // Test voor het scenario waarbij er geen game nights zijn
