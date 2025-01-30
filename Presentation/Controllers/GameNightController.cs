@@ -50,7 +50,8 @@ namespace BordspelAvond.Presentation.Controllers
             var userId = _userManager.GetUserId(User);
             if (userId == null)
             {
-                return RedirectToAction("Login", "Account");
+                var returnUrl = Url.Action("MyParticipatedGames", "GameNight");
+                return Redirect($"/Identity/Account/Login?ReturnUrl={returnUrl}");
             }
 
             // Roep de service aan om de businesslogica af te handelen, inclusief snacks
@@ -73,7 +74,8 @@ namespace BordspelAvond.Presentation.Controllers
             var userId = _userManager.GetUserId(User);
             if (userId == null)
             {
-                return RedirectToAction("Login", "Account");
+                var returnUrl = Url.Action("MyParticipatedGames", "GameNight");
+                return Redirect($"/Identity/Account/Login?ReturnUrl={returnUrl}");
             }
 
             // Roep de service aan om deelname en snack toe te voegen
@@ -82,7 +84,8 @@ namespace BordspelAvond.Presentation.Controllers
             if (!success)
             {
                 TempData["JoinError"] = errorMessage;
-                return RedirectToAction("Details", new { id = gameNightId });
+                var returnUrl = Url.Action("MyParticipatedGames", "GameNight");
+                return Redirect($"/Identity/Account/Login?ReturnUrl={returnUrl}");
             }
 
             TempData["JoinSuccess"] = "Successfully joined the GameNight and added your snack!";
