@@ -23,7 +23,7 @@ string authDbConnectionString;
 
 if (builder.Environment.IsDevelopment())
 {
-    // Gebruik de connection strings uit appsettings.Development.json voor de ontwikkelomgeving
+    // Development gebruikt User Secrets; de bestaande configuratienamen blijven behouden.
     bordspelDbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
         ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -139,7 +139,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // HTTP-verzoekpipeline configureren
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();

@@ -144,7 +144,9 @@
                         }
                         else if (!item.IsSnackRequired)
                         {
-                            <a asp-action="Join" asp-route-id="@item.Id" class="btn-primary">Join</a>
+                            <form asp-action="Join" asp-route-id="@item.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn-primary">Join</button>
+                            </form>
                         }
                         else
                         {

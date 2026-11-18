@@ -448,6 +448,17 @@ namespace BordspelAvond.Presentation.ApiControllers
 
             _logger.LogInformation($"User found: {user.UserName}");
 
+            var gameNight = await _gameNightService.GetGameNightByIdAsync(gameNightId);
+            if (gameNight == null)
+            {
+                return BadRequest(new { Message = "GameNight not found" });
+            }
+
+            if (gameNight.OrganizerId != user.Id)
+            {
+                return Forbid("Bearer");
+            }
+
             // Roep de service aan om het spel toe te voegen aan de GameNight
             try
             {

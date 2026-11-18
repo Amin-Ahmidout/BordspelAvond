@@ -2,6 +2,7 @@
 using BordspelAvond.Application.Services;
 using BordspelAvond.Core.Domain;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,6 +46,8 @@ namespace BordspelAvond.Presentation.Controllers
             return View(organizedGames);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Join(int id)
         {
             var userId = _userManager.GetUserId(User);
@@ -69,6 +72,7 @@ namespace BordspelAvond.Presentation.Controllers
 
         // Join met snack verplicht
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> JoinWithSnack(int gameNightId, string snackName, bool isVegetarian, bool isLactoseFree, bool isNutFree, bool isAlcoholFree)
         {
             var userId = _userManager.GetUserId(User);
@@ -304,9 +308,29 @@ namespace BordspelAvond.Presentation.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddGameToGameNight(int gameNightId, int gameId)
         {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Challenge();
+            }
+
+            var gameNight = await _gameNightService.GetGameNightByIdAsync(gameNightId);
+            if (gameNight == null)
+            {
+                TempData["GameAddError"] = "GameNight not found";
+                return RedirectToAction("Details", new { id = gameNightId });
+            }
+
+            if (gameNight.OrganizerId != userId)
+            {
+                return Forbid();
+            }
+
             var (success, message) = await _gameNightService.AddGameToGameNightAsync(gameNightId, gameId);
 
             if (!success)
